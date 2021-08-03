@@ -16,7 +16,7 @@ router.patch('/:productId', verifyToken, updateProduct);
 router.get('/', getProductList);
 router.delete('/:productId', verifyToken, deleteProduct);
 router.get('/:category', getProductsByCategory);
-router.get('/:subCategory', getProductsBySubCategory);
-router.get('/:prodTitle', getParticularProduct);
+router.get('/:category/:subCategory', getProductsBySubCategory);
+router.get('/collection/:productId', getParticularProduct);
 
 export default router;

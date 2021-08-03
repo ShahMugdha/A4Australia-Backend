@@ -8,7 +8,7 @@ export const verifyToken = async (req, res, next) => {
     if (authorization) {
       jwt.verify(authorization, process.env.JWT_AUTH_TOKEN, async (err, result) => {
         if (err) {
-          res.status(401).json({success: false, message: 'You Are Not Authorized', result: err});
+          return res.status(401).json({success: false, message: 'You Are Not Authorized', result: err});
         } else {
           req.userData = result;
           next();
@@ -19,3 +19,16 @@ export const verifyToken = async (req, res, next) => {
     res.status(403).json({success: false, result: e});
   }
 };
+
+export const verifyAdmin = async (req, res, next) => {
+  try {
+    const user = req.userData
+    if(user.role !== 'ADMIN') {
+      return res.status(401).json({success: false, message: 'You dont have admin rights', result: err});
+    }
+    next()
+  }
+  catch(err) {
+    return res.status(500).json({success: false, message: "something went wrong", result: err});
+  }
+}

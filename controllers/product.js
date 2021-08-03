@@ -29,8 +29,8 @@ export const getProductsByCategory = async(req, res) => {
 
 export const getProductsBySubCategory = async(req, res) => {
   try {
-    const {subCategory} = req.params;
-    const prodBySubCat = await Product.findOne({subCategory: subCategory})
+    const {category, subCategory} = req.params;
+    const prodBySubCat = await Product.find({category: category, subCategory: subCategory})
     if(!prodBySubCat) {
       return res.status(404).json({success: false, message: "product by this sub category not found"});
     }
@@ -43,12 +43,12 @@ export const getProductsBySubCategory = async(req, res) => {
 
 export const getParticularProduct = async(req, res) => {
   try {
-    const {prodTitle} = req.params;
-    const product = await Product.findOne({title: prodTitle})
+    const {productId} = req.params;
+    const product = await Product.findById(productId)
     if(!product) {
-      return res.status(404).json({success: false, message: "product by this title not found"});
+      return res.status(404).json({success: false, message: "product by this id not found"});
     }
-    return res.status(200).json({success: true, message: "retrieved product by title", result: product});
+    return res.status(200).json({success: true, message: "retrieved product by id", result: product});
   }
   catch(err) {
     return res.status(500).json({success: false, message: "something went wrong", result: err});

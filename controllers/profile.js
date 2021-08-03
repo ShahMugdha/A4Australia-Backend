@@ -16,3 +16,21 @@ export const getUserProfile = async(req, res) => {
     return res.status(500).json({success: false, message: "something went wrong", result: err});
   }
 }
+
+export const updateUserAccountDetails = async(req, res) => {
+  try {
+    const account = req.body
+    const updatedAccount = await User.findOneAndUpdate(
+      {_id: req.userData._id},
+      {$set: account}, 
+      {new : true}
+    )
+    if(!updatedAccount) {
+      return res.status(404).json({success: false, message: "account detils not updated"});
+    }
+    return res.status(201).json({success: true, message: "account detils updated", result: updatedAccount});
+  }
+  catch(err) {
+    return res.status(500).json({success: false, message: "something went wrong", result: err});
+  }
+}

@@ -51,7 +51,8 @@ export const addProductToCart = async(req, res) => {
     if(!productExists) {
       const newProduct = await Cart.findOneAndUpdate(
         {user: {_id: user._id}},
-        { $push: { products: products } }
+        { $push: { products: products } },
+        {new: true}
       )
       if(!newProduct) {
         return res.status(404).json({success: false, message: "new product not added to cart"});

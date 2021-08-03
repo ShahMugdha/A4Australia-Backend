@@ -4,27 +4,20 @@ import mongoose from "mongoose";
 const productSchema = new mongoose.Schema({
   title: {
     type: String,
-    trim: true,
     unique: true
   },
-  imageUrl: {
-    type: String
-  },
-  description: {
+  imageUrl: [{
     type: String,
-    trim: true
-  },
-  quantity: {
-    type: Number
+    required: true
+  }],
+  description: {
+    type: String
   },
   category: {
     type: String,
     enum: ['Men', 'Women', 'Unisex', 'Boys', 'Girls']
   },
   subCategory: {
-    type: String
-  },
-  size: {
     type: String
   },
   price: {

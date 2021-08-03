@@ -1,11 +1,12 @@
 import Product from '../models/product.js'
+import Inventory from '../models/inventory.js'
 import User from '../models/user.js'
 import Cart from '../models/cart.js'
 import WishList from '../models/wishlist.js'
 
 export const getWishList = async(req, res) => {
   try {
-    const wishlist = await WishList.find().populate('products').populate('user')
+    const wishlist = await WishList.find({user: {_id: req.userData._id}}).populate('products').populate('user')
     if(!wishlist) {
       return res.status(404).json({success: false, message: "wishlist list not found"});
     }
@@ -54,7 +55,8 @@ export const addProductToWishList = async(req, res) => {
     if(!productExists) {
       const newProduct = await WishList.findOneAndUpdate(
         {user: {_id: userData._id}},
-        { $push: { products: products } }
+        {$push: {products: products }},
+        {new: true}
       )
       if(!newProduct) {
         return res.status(404).json({success: false, message: "new product not added to wishlist"});
@@ -85,7 +87,7 @@ export const deleteProductFromWishList = async(req, res) => {
 
 export const moveProductToCart = async(req, res) => {
   try {
-    const {productId} = req.params
+    const {productId, size} = req.params
     const selectedProduct = await WishList.findOneAndUpdate(
       {user: {_id: req.userData._id}},
       {$pull: { products: productId}}
@@ -93,10 +95,22 @@ export const moveProductToCart = async(req, res) => {
     if(!selectedProduct) {
       return res.status(404).json({success: false, message: "product not deleted from wishlist"});
     }
-    const product = await Product.findById(productId)
+    const product = await Inventory.findOne({product: {_id: productId}, stock: {size}})
     console.log(product, "product in db")
     if(!product) {
       return res.status(404).json({success: false, message: "product not found in database"});
+    }
+    const existingCart = await Cart.findOne({user: {_id: req.userData._id}})
+    if(!existingCart) {
+      const createdCart = await Cart.create({
+        user: req.userData,
+        products: product
+      })
+      if(!createdCart) {
+        return res.status(404).json({success: false, message: "your cart is still empty"});
+      }
+      const addedSize = await Cart.findOneAndUpdate
+      return res.status(201).json({success: true, message: "moved the first product with size to cart", result: createdCart});
     }
     const movedProduct = await Cart.findOneAndUpdate(
       {user: {_id: req.userData._id}},
