@@ -69,18 +69,34 @@ export const addProductToCart = async(req, res) => {
 
 export const updateProductDetails = async(req, res) => {
   try {
-    const {size, quantity} = req.query
+    const { productId, size }= req.params;
+    const {Size, quantity} = req.query
     const Quantity = parseInt(quantity)
-    const { productId }= req.params;
+
+    const existingSize = await Cart.findOne({user: req.userData, cart: {$elemMatch: {product: {_id: productId}, size:Size}}})
+    if(existingSize) {
+      const updatedProductQuantity = await Cart.findOneAndUpdate(
+        {user: {_id: req.userData._id}, cart: {$elemMatch: {product: {_id: productId}, Size}}},
+        //{$pull: {cart: {$elemMatch: {product: {_id: productId}, Size}}}},
+        {$set:  {'cart.$.quantity': Quantity}}, 
+        {new : true}
+      );
+      console.log(updatedProductQuantity, "quantity updated")
+      if(!updatedProductQuantity) {
+        return res.status(404).json({success: false, message: "product quantity not updated"});
+      }
+      return res.status(201).json({success: true, message: "product details updated with quantity", result: updatedProductQuantity});
+    }
+
     const updatedProductDetails = await Cart.findOneAndUpdate(
-      {user: {_id: req.userData._id}, products: {_id: productId}},
-      { $set:  {'products.$.size': size, 'products.$.quantity': Quantity} }, 
+      {user: {_id: req.userData._id}, cart: {$elemMatch: {product: {_id: productId}, size}}},
+      { $set:  {'cart.$.size':Size, 'cart.$.quantity': Quantity} }, 
       { new : true }
-    ).populate('products');
+    );
     if(!updatedProductDetails) {
       return res.status(404).json({success: false, message: "product details not updated"});
     }
-    return res.status(201).json({success: true, message: "product details updated", result: updatedProductDetails});
+    return res.status(201).json({success: true, message: "product details updated with size", result: updatedProductDetails});
   }
   catch(err) {
     return res.status(500).json({success: true, message: "something went wrong", result: err});

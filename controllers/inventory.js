@@ -75,13 +75,14 @@ export const updateInventoryStock = async(req, res) => {
 
     const stock = await Inventory.findOneAndUpdate(
       {product: {_id: product}},
-      { $set: inventoryData }, 
+      {$elemMatch: {stock: {size}}},
+      { $set: {'stock.$.quantity': quantity} }, 
       { new : true }
     );
-    if(!inventory) {
-      return res.status(404).json({success: false, message: "inventory not updated"});
+    if(!stock) {
+      return res.status(404).json({success: false, message: "inventory of this product not updated"});
     }
-    return res.status(201).json({success: true, message: "inventory updated", result: inventory});
+    return res.status(201).json({success: true, message: "inventory updated", result: stock});
   }
   catch(err) {
     return res.status(500).json({success: true, message: "something went wrong", result: err});

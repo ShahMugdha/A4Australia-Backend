@@ -95,33 +95,40 @@ export const moveProductToCart = async(req, res) => {
     if(!selectedProduct) {
       return res.status(404).json({success: false, message: "product not deleted from wishlist"});
     }
-    const product = await Inventory.findOne({product: {_id: productId}, stock: {size}})
-    console.log(product, "product in db")
-    if(!product) {
-      return res.status(404).json({success: false, message: "product not found in database"});
+
+    const sizeCheck = await Inventory.findOne({product: {_id: productId}, stock: {$elemMatch: {size, quantity: {$gt:0}}}}).populate('product')
+    if(!sizeCheck) {
+      return res.status(404).json({success: false, message: "product of this size out of stock"});
     }
+
     const existingCart = await Cart.findOne({user: {_id: req.userData._id}})
+    console.log(existingCart, "cart exist")
     if(!existingCart) {
       const createdCart = await Cart.create({
         user: req.userData,
-        products: product
+        cart: {product: {_id: productId}, size}
       })
       if(!createdCart) {
         return res.status(404).json({success: false, message: "your cart is still empty"});
       }
-      const addedSize = await Cart.findOneAndUpdate
+      console.log(createdCart, "cart create")
       return res.status(201).json({success: true, message: "moved the first product with size to cart", result: createdCart});
     }
-    const movedProduct = await Cart.findOneAndUpdate(
-      {user: {_id: req.userData._id}},
-      {$push: { products: product }},
-      {new: true}
-    ).populate('products')
-    console.log(movedProduct, "moved product in cart")
-    if(!movedProduct) {
-      return res.status(404).json({success: false, message: "product not moved to cart"});
+    
+    const existingProductWithSize = await Cart.findOne({user: req.userData, cart: {product: {_id: productId}, size}})
+    if(!existingProductWithSize) {
+      const movedProduct = await Cart.findOneAndUpdate(
+        {user: {_id: req.userData._id}},
+        {$push: { cart: {product: {_id: productId}, size} }},
+        {new: true}
+      ).populate('products')
+      console.log(movedProduct, "moved product in cart")
+      if(!movedProduct) {
+        return res.status(404).json({success: false, message: "product not moved to cart"});
+      }
+      return res.status(200).json({success: true, message: "product deleted from wishlist and moved to cart", result: movedProduct});
     }
-    return res.status(200).json({success: true, message: "product deleted from wishlist and moved to cart", result: movedProduct});
+    return res.status(404).json({success: false, message: `product with ${size} size already exists in cart`});
   }
   catch(err) {
     return res.status(500).json({success: false, message: "something went wrong", result: err});

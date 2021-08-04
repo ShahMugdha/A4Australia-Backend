@@ -1,10 +1,25 @@
 import mongoose from "mongoose";
 
 const cartSchema = new mongoose.Schema({
-  products: [{
+  user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'product',
-    unique: true
+    ref: 'user'
+  },
+  cart: [{
+    product: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'product',
+      unique: true
+    },
+    size: {
+      type: String,
+      enum: ["Small", "Medium", "Large"]
+    },
+    quantity: {
+      type: Number,
+      default: 1
+    },
+    price: Number
   }],
   totalQuantity: {
     type: Number
@@ -15,10 +30,6 @@ const cartSchema = new mongoose.Schema({
   priceWithGST: {
     type: Number,
     default: 0
-  },
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'user'
   }
 }, {
   timestamps: true,

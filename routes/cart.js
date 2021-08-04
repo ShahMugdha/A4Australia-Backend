@@ -10,7 +10,7 @@ import {
 } from '../controllers/cart.js';
 
 router.post('/:productId', verifyToken, addProductToCart);
-router.patch('/:productId/', verifyToken, updateProductDetails);
+router.patch('/:productId/:size', verifyToken, updateProductDetails);
 router.get('/', verifyToken, getCartList);
 router.delete('/cartId/:productId', verifyToken, deleteProductFromCart);
 router.get('/:prodTitle', verifyToken, getParticularProduct);

@@ -6,10 +6,9 @@ const productSchema = new mongoose.Schema({
     type: String,
     unique: true
   },
-  imageUrl: [{
-    type: String,
-    required: true
-  }],
+  imageUrl: {
+    type: [String]
+  },
   description: {
     type: String
   },

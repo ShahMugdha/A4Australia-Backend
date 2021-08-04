@@ -9,12 +9,12 @@ const inventorySchema = new mongoose.Schema({
   stock: [{
     size: {
       type: String,
-      required: true
+      //required: true
     },
     quantity: {
       type: Number,
       default: 1
-      required: true
+      //required: true
     }
   }]
 }, {
