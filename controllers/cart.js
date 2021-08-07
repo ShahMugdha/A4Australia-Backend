@@ -4,7 +4,7 @@ import WishList from '../models/wishlist.js'
 
 export const getCartList = async(req, res) => {
   try {
-    const cart = await Cart.find({user: {_id: req.userData._id}}).populate('products').populate('user')
+    const cart = await Cart.find({user: {_id: req.userData._id}}).populate('user').populate('cart.product')
     if(!cart) {
       return res.status(404).json({success: false, message: "cart list not found"});
     }
@@ -51,7 +51,7 @@ export const addProductToCart = async(req, res) => {
     if(!productExists) {
       const newProduct = await Cart.findOneAndUpdate(
         {user: {_id: user._id}},
-        { $push: { products: products } },
+        {$push: {products: products}},
         {new: true}
       )
       if(!newProduct) {
@@ -106,7 +106,7 @@ export const updateProductDetails = async(req, res) => {
 export const deleteProductFromCart = async(req, res) => {
   try {
     const {productId} = req.params
-    const deletedProduct = await Cart.findOneAndDelete({'user._id': req.userData._id, 'products._id': productId})
+    const deletedProduct = await Cart.findOneAndUpdate({'user._id': req.userData._id, 'products._id': productId})
     if(!deletedProduct) {
       return res.status(404).json({success: false, message: "product not deleted from cart"});
     }
@@ -120,10 +120,14 @@ export const deleteProductFromCart = async(req, res) => {
 export const moveProductToWishList = async(req, res) => {
   try {
     const {productId} = req.params
-    const removedProduct = await Cart.findOneAndDelete({'user._id': req.userData._id, 'products._id': productId})
+    const removedProduct = await Cart.findOneAndUpdate(
+      {user: {_id: req.userData._id}}, 
+      {cart: {$elemMatch: {product: {_id: productId}}}},
+      {$pull: {cart: {$elemMatch: {product: {_id: productId}, Size}}}}
+    )
     const movedProduct = await WishList.findOneAndUpdate(
       {user: {_id: req.userData._id}},
-      { $push: { products: removedProduct } }
+      {$push: {products: removedProduct}}
     )
     if(!movedProduct) {
       return res.status(404).json({success: false, message: "product not moved to wishlist"});

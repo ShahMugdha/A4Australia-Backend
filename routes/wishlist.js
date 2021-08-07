@@ -11,7 +11,7 @@ import {
 
 router.post('/:productId', verifyToken, addProductToWishList);
 router.get('/', verifyToken, getWishList);
-router.delete('/:productId', verifyToken, deleteProductFromWishList);
+router.patch('/:productId', verifyToken, deleteProductFromWishList);
 router.get('/:prodTitle', verifyToken, getParticularProduct);
 router.post('/move-to-cart/:productId/:size', verifyToken, moveProductToCart);
 

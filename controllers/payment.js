@@ -1,0 +1,56 @@
+import Stripe from 'stripe';
+const stripe = new Stripe('sk_test_51JL37MSIq5ANGvjetR9UF6a5McLo0Yt9J38tNsZaManCnbNxFU48Lxhy7xeDTyogt5z9e2FrMgNITTy1c4aSJ6Sm00OGNrdWCP')
+
+const generateResponse = (intent) => {
+  // Note that if your API version is before 2019-02-11, 'requires_action'
+  // appears as 'requires_source_action'.
+  if (
+    intent.status === 'requires_action' &&
+    intent.next_action.type === 'use_stripe_sdk'
+  ) {
+    // Tell the client to handle the action
+    return {
+      requires_action: true,
+      //payment_intent_client_secret: intent.client_secret
+      paymentMethodType: 'card'
+    };
+  } else if (intent.status === 'succeeded') {
+    // The payment didn’t need any additional actions and completed!
+    // Handle post-payment fulfillment
+    return {
+      success: true
+    };
+  } else {
+    // Invalid status
+    return {
+      error: 'Invalid PaymentIntent status'
+    }
+  }
+}
+
+export const createPaymentIntent = async(req, res) => {
+  try {
+    let intent;
+    if (req.body.payment_method_id) {
+      // Create the PaymentIntent
+      intent = await stripe.paymentIntents.create({
+        payment_method: req.body.payment_method_id,
+        amount: 1099,
+        currency: 'inr',
+        confirmation_method: 'manual',
+        confirm: true
+      });
+      console.log(intent, "intent")
+    } else if (req.body.payment_intent_id) {
+      intent = await stripe.paymentIntents.confirm(
+        req.body.payment_intent_id
+      );
+    }
+    // Send the response to the client
+    res.send(generateResponse(intent));
+  }
+  catch (e) {
+    // Display error on client
+    return res.send({ error: e.message });
+  }
+}

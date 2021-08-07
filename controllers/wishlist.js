@@ -74,7 +74,12 @@ export const addProductToWishList = async(req, res) => {
 export const deleteProductFromWishList = async(req, res) => {
   try {
     const {productId} = req.params
-    const deletedProduct = await WishList.findOneAndDelete({user: {_id: req.userData._id}, 'products._id': productId})
+    const deletedProduct = await WishList.findOneAndUpdate(
+      {user: {_id: req.userData._id}},
+      {$pull: {products: productId}},
+      {new: true}
+    )
+    console.log(deletedProduct, "deleted")
     if(!deletedProduct) {
       return res.status(404).json({success: false, message: "product not deleted from wishlist"});
     }

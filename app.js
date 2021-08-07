@@ -19,6 +19,7 @@ import addressRoute from './routes/address.js'
 import profileRoute from './routes/profile.js'
 import wishListRoute from './routes/wishlist.js'
 import inventoryRoute from './routes/inventory.js'
+import paymentRoute from './routes/payment.js'
 
 app.use('/api/v1/auth', authRoute)
 app.use('/api/v1/product', productRoute)
@@ -28,6 +29,7 @@ app.use('/api/v1/address', addressRoute)
 app.use('/api/v1/profile', profileRoute)
 app.use('/api/v1/wishlist', wishListRoute)
 app.use('/api/v1/inventory', inventoryRoute)
+app.use('/', paymentRoute)
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
