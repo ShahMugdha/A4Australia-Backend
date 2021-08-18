@@ -19,15 +19,16 @@ const cartSchema = new mongoose.Schema({
       type: Number,
       default: 1
     },
-    price: Number
+    price: {
+      type: Number,
+      default: 0
+    }
   }],
   totalQuantity: {
-    type: Number
+    type: Number,
+    default: 1
   },
   totalPrice: {
-    type: Number
-  },
-  priceWithGST: {
     type: Number,
     default: 0
   }

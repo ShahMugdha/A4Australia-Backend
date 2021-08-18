@@ -21,6 +21,8 @@ import wishListRoute from './routes/wishlist.js'
 import inventoryRoute from './routes/inventory.js'
 import paymentRoute from './routes/payment.js'
 
+app.use(express.static('uploads'));
+
 app.use('/api/v1/auth', authRoute)
 app.use('/api/v1/product', productRoute)
 app.use('/api/v1/cart', cartRoute)

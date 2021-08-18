@@ -5,14 +5,18 @@ import {
   getCartList,
   getParticularProduct,
   addProductToCart,
-  updateProductDetails,
-  deleteProductFromCart
+  updateProductSize,
+  updateProductQuantity,
+  deleteProductFromCart,
+  moveProductToWishList
 } from '../controllers/cart.js';
 
-router.post('/:productId', verifyToken, addProductToCart);
-router.patch('/:productId/:size', verifyToken, updateProductDetails);
+router.post('/:productId/:size', verifyToken, addProductToCart);
+router.patch('/update-product-size/:productId/:originalSize/:updatedSize', verifyToken, updateProductSize);
+router.patch('/update-product-quantity/:productId/:size/:quantity', verifyToken, updateProductQuantity);
 router.get('/', verifyToken, getCartList);
-router.patch('/cartId/:productId', verifyToken, deleteProductFromCart);
+router.patch('/remove-product/:productId/:size', verifyToken, deleteProductFromCart);
+router.patch('/move-to-wishlist/:productId/:size', verifyToken, moveProductToWishList);
 router.get('/:prodTitle', verifyToken, getParticularProduct);
 
 export default router;

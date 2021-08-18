@@ -1,6 +1,7 @@
 import express from 'express';
 const router = express.Router();
 import { verifyToken, verifyAdmin } from "../middleware/verifyToken.js";
+import upload from '../middleware/upload.js';
 import {
   getProductList,
   getProductsByCategory,
@@ -11,7 +12,7 @@ import {
   deleteProduct
 } from '../controllers/product.js';
 
-router.post('/', verifyToken, addProduct);
+router.post('/', verifyToken, upload, addProduct);
 router.patch('/:productId', verifyToken, updateProduct);
 router.get('/', getProductList);
 router.delete('/:productId', verifyToken, deleteProduct);

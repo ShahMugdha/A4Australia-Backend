@@ -75,7 +75,7 @@ export const deleteProductFromWishList = async(req, res) => {
   try {
     const {productId} = req.params
     const deletedProduct = await WishList.findOneAndUpdate(
-      {user: {_id: req.userData._id}},
+      {user: {_id: req.userData._id}, products: productId},
       {$pull: {products: productId}},
       {new: true}
     )
