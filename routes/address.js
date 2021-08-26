@@ -9,10 +9,10 @@ import {
   removeAddress 
 } from '../controllers/address.js';
 
-router.post('/', verifyToken, addAddress);
+router.put('/', verifyToken, addAddress);
 router.patch('/my-address/:addressId', verifyToken, updateAddress);
 router.get('/', verifyToken, getAllAddresses);
-router.delete('/my-address/:addressId', verifyToken, removeAddress);
+router.patch('/my-address/:addressId', verifyToken, removeAddress);
 router.get('/my-address', verifyToken, getMyAddress); 
 
 export default router;

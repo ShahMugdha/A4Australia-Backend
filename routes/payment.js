@@ -6,6 +6,6 @@ import {
   createPaymentIntent
 } from '../controllers/payment.js';
 
-router.post('/pay', createPaymentIntent);
+router.post('/pay/:userId', createPaymentIntent);
 
 export default router;

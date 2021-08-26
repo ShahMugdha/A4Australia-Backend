@@ -6,26 +6,26 @@ export const addAddress = async(req, res) => {
     const userExists = await Address.findOne({user: {_id: user._id}})
     console.log(userExists, "user exists")
     const {
+      name,
       state,
       city,
-      subUrb,
+      country,
       addressLine1,
       addressLine2,
       postalCode,
-      mobile
     } = req.body
     if(!userExists) {
       const address = await Address.create({
         user,
-        addresses: [{
+        addresses: {
+          name: name,
           state,
           city,
-          subUrb,
+          country,
           addressLine1,
           addressLine2,
-          postalCode,
-          mobile
-        }]
+          postalCode
+        }
       });
       if(!address) {
         return res.status(404).json({success: false, message: "address not created"});
@@ -33,15 +33,15 @@ export const addAddress = async(req, res) => {
       return res.status(201).json({success: true, message: "address created", result: address});
     }
     const addressExists = await Address.findOne({
-      addresses: { 
+      addresses: { $elemMatch: {
+        name,
         state,
         city,
-        subUrb,
+        country,
         addressLine1,
         addressLine2,
-        postalCode,
-        mobile
-      }
+        postalCode
+      }}
     })
     console.log(addressExists, "address exists")
     if(!addressExists) {
@@ -49,15 +49,16 @@ export const addAddress = async(req, res) => {
         {user: {_id: user._id}},
         { $push: { 
           addresses: { 
+            name,
             state,
             city,
-            subUrb,
+            country,
             addressLine1,
             addressLine2,
-            postalCode,
-            mobile
+            postalCode
           }
-        }}
+        }},
+        {new: true}
       )
       if(!newAddress) {
         return res.status(404).json({success: false, message: "new address not added "});
@@ -74,7 +75,7 @@ export const addAddress = async(req, res) => {
 
 export const getAllAddresses = async(req, res) => {
   try {
-    const addresses = await Address.find({user: {_id: req.userData._id}}).populate('addresses').populate('user')
+    const addresses = await Address.find().populate('user')
     if(!addresses) {
       return res.status(404).json({success: false, message: "address list not found"});
     }

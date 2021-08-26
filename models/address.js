@@ -6,13 +6,16 @@ const addressSchema = new mongoose.Schema({
     ref: "user"
   },
   addresses: [{
-    state: {
+    name: {
       type: String
     },
     city: {
       type: String
     },
-    subUrb: {
+    state: {
+      type: String
+    },
+    country: {
       type: String
     },
     addressLine1: {
@@ -23,13 +26,10 @@ const addressSchema = new mongoose.Schema({
     },
     postalCode: {
       type: Number
-    },
-    mobile: {
-      type: Number
     }
-  }, {
-    timestamps: true,
   }]
+}, {
+  timestamps: true
 })
 
 const Address = mongoose.model('address', addressSchema);

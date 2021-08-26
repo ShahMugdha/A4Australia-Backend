@@ -12,7 +12,7 @@ import {
   deleteProduct
 } from '../controllers/product.js';
 
-router.post('/', verifyToken, upload, addProduct);
+router.post('/', verifyToken, verifyAdmin, addProduct);
 router.patch('/:productId', verifyToken, updateProduct);
 router.get('/', getProductList);
 router.delete('/:productId', verifyToken, deleteProduct);

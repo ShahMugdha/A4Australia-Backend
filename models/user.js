@@ -30,10 +30,9 @@ const userSchema = new mongoose.Schema(
       default: 'CUSTOMER',
       require: true,
     },
-  },
-  {
-    timestamps: true
-  });
+  }, {
+  timestamps: true
+});
 
 const User = mongoose.model('user', userSchema);
 export default User;

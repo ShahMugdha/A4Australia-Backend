@@ -17,6 +17,6 @@ router.patch('/update-product-quantity/:productId/:size/:quantity', verifyToken,
 router.get('/', verifyToken, getCartList);
 router.patch('/remove-product/:productId/:size', verifyToken, deleteProductFromCart);
 router.patch('/move-to-wishlist/:productId/:size', verifyToken, moveProductToWishList);
-router.get('/:prodTitle', verifyToken, getParticularProduct);
+router.get('/:productId', verifyToken, getParticularProduct);
 
 export default router;

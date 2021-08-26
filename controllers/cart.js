@@ -4,7 +4,7 @@ import WishList from '../models/wishlist.js'
 
 export const getCartList = async(req, res) => {
   try {
-    const cart = await Cart.find({user: {_id: req.userData._id}}).populate('user').populate('cart.product')
+    const cart = await Cart.find({user: req.userData}).populate('user').populate('cart.product')
     if(!cart) {
       return res.status(404).json({success: false, message: "cart list not found"});
     }
@@ -17,8 +17,8 @@ export const getCartList = async(req, res) => {
 
 export const getParticularProduct = async(req, res) => {
   try {
-    const {prodTitle} = req.params;
-    const product = await Product.findOne({title: prodTitle})
+    const {productId} = req.params;
+    const product = await Product.findById(productId)
     if(!product) {
       return res.status(404).json({success: false, message: "product by this title not found"});
     }
@@ -108,12 +108,12 @@ export const updateProductDetails = async(req, res) => {
 export const updateProductSize = async(req, res) => {
   try {
     const { productId, originalSize, updatedSize }= req.params
-    const existingSize = await Cart.findOne({user: req.userData, cart: {$elemMatch: {product: {_id: productId}, size: updatedSize}}})
+    const existingSize = await Cart.findOne({user: req.userData, cart: {$elemMatch: {product: {_id: productId}, size: updatedSize}}}, {"cart.$": 1})
     if(existingSize) {
       const updatedProductQuantity = await Cart.findOneAndUpdate(
-        {user: {_id: req.userData._id}, cart: {$elemMatch: {product: {_id: productId}, size: updatedSize}}},
+        {user: req.userData, cart: {$elemMatch: {product: {_id: productId}, size: updatedSize}}},
         {$pull: {cart: {product: {_id: productId}, size: originalSize}}},
-        {$set: {cart: {product: {_id: productId}, size: updatedSize}, $inc: {price: existingSize.price}, $inc: {quantity: existingSize.quantity}}},
+        {$set: {$inc: {cart: {price: existingSize.cart[0].price, quantity: existingSize.cart[0].quantity}}}},
         {new : true}
       );
       console.log(updatedProductQuantity, "quantity updated")
@@ -124,7 +124,7 @@ export const updateProductSize = async(req, res) => {
     }
 
     const updatedProductSize = await Cart.findOneAndUpdate(
-      {user: {_id: req.userData._id}, cart: {$elemMatch: {product: {_id: productId}, size: originalSize}}},
+      {user: req.userData, cart: {$elemMatch: {product: {_id: productId}, size: originalSize}}},
       {$set:  {'cart.$.size':updatedSize}}, 
       {new : true}
     );
@@ -142,9 +142,12 @@ export const updateProductQuantity = async(req, res) => {
   try {
     const { productId, size, quantity }= req.params
     const product = await Product.findById(productId)
+    const cartProduct = await Cart.findOne({user: req.userData, cart: {$elemMatch: {product: {_id: productId}, size}}}, {"cart.$": 1})
+    const previousQuantity = cartProduct.cart[0].quantity
+    const absDiff = Math.abs(previousQuantity - quantity)
     const updatedProductQuantity = await Cart.findOneAndUpdate(
       {user: {_id: req.userData._id}, cart: {$elemMatch: {product: {_id: productId}, size}}},
-      { $set:  {'cart.$.quantity': quantity, 'cart.$.price': product.price * quantity}}, 
+      { $set:  {'cart.$.quantity': quantity, 'cart.$.price': product.price * quantity}, $inc: {totalQuantity: absDiff, totalPrice: absDiff * product.price}}, 
       { new : true }
     );
     if(!updatedProductQuantity) {
@@ -176,7 +179,7 @@ export const deleteProductFromCart = async(req, res) => {
     console.log(deletedProduct, "deleted from cart")
 
     const updatedQuantityAndPrice = await Cart.findOneAndUpdate(
-      { _id: deletedProduct._id},
+      {_id: deletedProduct._id},
       {$inc: {totalQuantity: -quantity, totalPrice: -price}},
       {new: true}
     )

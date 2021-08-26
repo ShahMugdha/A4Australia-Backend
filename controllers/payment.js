@@ -1,5 +1,7 @@
 import Stripe from 'stripe';
-const stripe = new Stripe('sk_test_51JL37MSIq5ANGvjetR9UF6a5McLo0Yt9J38tNsZaManCnbNxFU48Lxhy7xeDTyogt5z9e2FrMgNITTy1c4aSJ6Sm00OGNrdWCP')
+import Cart from '../models/cart.js'
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
 const generateResponse = (intent) => {
   // Note that if your API version is before 2019-02-11, 'requires_action'
@@ -30,12 +32,14 @@ const generateResponse = (intent) => {
 
 export const createPaymentIntent = async(req, res) => {
   try {
+    const {userId} = req.params
+    const cart = await Cart.findOne({user: {_id: userId}}).populate('user')
     let intent;
     if (req.body.payment_method_id) {
       // Create the PaymentIntent
       intent = await stripe.paymentIntents.create({
         payment_method: req.body.payment_method_id,
-        amount: 1099,
+        amount: cart.totalPrice,
         currency: 'inr',
         confirmation_method: 'manual',
         confirm: true
