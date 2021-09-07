@@ -59,7 +59,6 @@ export const addProduct = async(req, res) => {
   try {
     const {
       title,
-      imageUrl,
       category,
       subCategory,
       description,
@@ -67,10 +66,10 @@ export const addProduct = async(req, res) => {
       size,
       price
     } = req.body
-  
+    const image = req.file.path
     const product = await Product.create({
       title,
-      imageUrl,
+      image,
       category,
       subCategory,
       description,

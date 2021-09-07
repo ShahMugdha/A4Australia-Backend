@@ -93,6 +93,12 @@ export const deleteProductFromWishList = async(req, res) => {
 export const moveProductToCart = async(req, res) => {
   try {
     const {productId, size} = req.params
+
+    const sizeCheck = await Inventory.findOne({product: {_id: productId}, stock: {$elemMatch: {size, quantity: {$gt:0}}}}).populate('product')
+    if(!sizeCheck) {
+      return res.status(404).json({success: false, message: "product of this size out of stock"});
+    }
+
     const selectedProduct = await WishList.findOneAndUpdate(
       {user: {_id: req.userData._id}},
       {$pull: { products: productId}}
@@ -101,17 +107,13 @@ export const moveProductToCart = async(req, res) => {
       return res.status(404).json({success: false, message: "product not deleted from wishlist"});
     }
 
-    const sizeCheck = await Inventory.findOne({product: {_id: productId}, stock: {$elemMatch: {size, quantity: {$gt:0}}}}).populate('product')
-    if(!sizeCheck) {
-      return res.status(404).json({success: false, message: "product of this size out of stock"});
-    }
-
     const existingCart = await Cart.findOne({user: {_id: req.userData._id}})
     console.log(existingCart, "cart exist")
     if(!existingCart) {
+      const product = await Product.findById(productId)
       const createdCart = await Cart.create({
         user: req.userData,
-        cart: {product: {_id: productId}, size}
+        cart: {product: {_id: productId}, size, price: product.price}
       })
       if(!createdCart) {
         return res.status(404).json({success: false, message: "your cart is still empty"});
@@ -122,9 +124,10 @@ export const moveProductToCart = async(req, res) => {
     
     const existingProductWithSize = await Cart.findOne({user: req.userData, cart: {product: {_id: productId}, size}})
     if(!existingProductWithSize) {
+      const product = await Product.findById(productId)
       const movedProduct = await Cart.findOneAndUpdate(
         {user: {_id: req.userData._id}},
-        {$push: { cart: {product: {_id: productId}, size} }},
+        {$push: { cart: {product: {_id: productId}, size, price: product.price}}},
         {new: true}
       ).populate('products')
       console.log(movedProduct, "moved product in cart")

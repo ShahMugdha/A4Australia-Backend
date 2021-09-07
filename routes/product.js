@@ -12,12 +12,12 @@ import {
   deleteProduct
 } from '../controllers/product.js';
 
-router.post('/', verifyToken, verifyAdmin, addProduct);
-router.patch('/:productId', verifyToken, updateProduct);
+router.post('/', verifyToken, upload, verifyAdmin, addProduct);
+router.patch('/:productId', verifyToken, verifyAdmin, updateProduct);
 router.get('/', getProductList);
-router.delete('/:productId', verifyToken, deleteProduct);
+router.delete('/:productId', verifyToken, verifyAdmin, deleteProduct);
 router.get('/:category', getProductsByCategory);
 router.get('/:category/:subCategory', getProductsBySubCategory);
-router.get('/collection/:productId', getParticularProduct);
+router.get('/collection/particular/:productId', getParticularProduct);
 
 export default router;

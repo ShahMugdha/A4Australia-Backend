@@ -10,9 +10,9 @@ import {
 } from '../controllers/address.js';
 
 router.put('/', verifyToken, addAddress);
-router.patch('/my-address/:addressId', verifyToken, updateAddress);
+router.patch('/my-address/update/:addressId', verifyToken, updateAddress);
 router.get('/', verifyToken, getAllAddresses);
-router.patch('/my-address/:addressId', verifyToken, removeAddress);
+router.patch('/my-address/remove/:addressId', verifyToken, removeAddress);
 router.get('/my-address', verifyToken, getMyAddress); 
 
 export default router;

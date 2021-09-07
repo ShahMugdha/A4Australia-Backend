@@ -105,7 +105,7 @@ export const updateAddress = async(req, res) => {
     const {addressId} = req.params
     const address = req.body
     const updatedAddress = await Address.findOneAndUpdate(
-      {user: {_id: req.userData._id}, addresses: {_id: addressId}},
+      {user: {_id: req.userData._id}, addresses: {$elemMatch: {_id: addressId}}},
       {$set: {addresses: address}}, 
       { new : true }
     )
@@ -122,7 +122,11 @@ export const updateAddress = async(req, res) => {
 export const removeAddress = async(req, res) => {
   try {
     const {addressId} = req.params
-    const deletedAddress = await Address.findOneAndDelete({'user._id': req.userData._id, 'addresses._id': addressId})
+    const deletedAddress = await Address.findOneAndUpdate(
+      {user: req.userData, addresses: {$elemMatch: {_id: addressId}}},
+      {$pull: {addresses: {_id: addressId}}},
+      {new: true}
+    )
     if(!deletedAddress) {
       return res.status(404).json({success: false, message: "address not deleted"});
     }

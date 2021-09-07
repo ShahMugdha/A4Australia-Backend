@@ -4,6 +4,9 @@
 import Order from '../models/order.js'
 import Cart from '../models/cart.js'
 import Product from '../models/product.js'
+import Stripe from 'stripe';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
 export const createOrder = async(req, res) => {
   try {
@@ -150,5 +153,18 @@ export const cancelItem = async(req, res) => {
     res.status(400).json({
       error: 'Your request could not be processed. Please try again.'
     });
+  }
+}
+
+export const dashboard = async(req, res) => {
+  try {
+    const paymentIntents = await stripe.paymentIntents.list();
+    if(link) {
+      return res.status(200).json({success: true, message: "success", result: paymentIntents});
+    }
+    return res.status(400).json({error: 'Your request could not be processed. Please try again.'});
+  }
+  catch (err) {
+    return res.status(500).json({success: false, message: "something went wrong", result: err});
   }
 }

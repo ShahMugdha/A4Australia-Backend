@@ -3,7 +3,7 @@ import Inventory from '../models/inventory.js'
 
 export const getInventoryList = async(req, res) => {
   try {
-    const inventoryList = await Inventory.find()
+    const inventoryList = await Inventory.find().populate('product')
     if(!inventoryList) {
       return res.status(404).json({success: false, message: "inventory list not found"});
     }
@@ -48,7 +48,7 @@ export const addProductInventory = async(req, res) => {
       return res.status(201).json({success: true, message: "inventory created", result: createdInventory});
     }
 
-    const existingStock = await Inventory.findOne({product: {_id: productId}, stock: {size, quantity}}) 
+    const existingStock = await Inventory.findOne({product: {_id: productId}, stock: {$elemMatch : {size, quantity}}}) 
     if(existingStock) {
       return res.status(404).json({success: false, message: "this stock already exists"});
     }
@@ -70,14 +70,31 @@ export const addProductInventory = async(req, res) => {
 
 export const updateInventoryStock = async(req, res) => {
   try {
-    const {productId, size} = req.params
-    const {quantity} = req.body
+    const {productId} = req.params
+    const {size, quantity} = req.body
+
+    const existingStock = await Inventory.findOne({product: {_id: productId}, stock: {$elemMatch : {size, quantity}}}) 
+    if(existingStock) {
+      return res.status(404).json({success: false, message: "this stock already exists"});
+    }
+
+    const existingSize = await Inventory.findOne({product: {_id: productId}, stock: {$elemMatch : {size}}})
+    if(existingSize) {
+      const updatedStockWithSameSize = await Inventory.findOneAndUpdate(
+        {product: {_id: productId}},
+        {$set: {stock: {size, quantity}}},
+        {new : true}
+      );
+      if(!updatedStockWithSameSize) {
+        return res.status(404).json({success: false, message: "inventory of this product not updated with same size"});
+      }
+      return res.status(201).json({success: true, message: "inventory updated with same size", result: updatedStockWithSameSize});
+    }
 
     const stock = await Inventory.findOneAndUpdate(
-      {product: {_id: product}},
-      {$elemMatch: {stock: {size}}},
-      { $set: {'stock.$.quantity': quantity} }, 
-      { new : true }
+      {product: {_id: productId}},
+      {$push: {stock: {size, quantity}}},
+      {new : true}
     );
     if(!stock) {
       return res.status(404).json({success: false, message: "inventory of this product not updated"});
@@ -89,7 +106,7 @@ export const updateInventoryStock = async(req, res) => {
   }
 }
 
-export const deleteInventoryStock = async(req, res) => {
+/* export const deleteInventoryStock = async(req, res) => {
   try {
     const {inventoryId} = req.params
     const deletedProduct = await Product.findOneAndDelete({_id: inventoryId})
@@ -101,12 +118,12 @@ export const deleteInventoryStock = async(req, res) => {
   catch(err) {
     return res.status(500).json({success: true, message: "something went wrong", result: err});
   }
-}
+} */
 
 export const deleteProductInventory = async(req, res) => {
   try {
-    const {inventoryId} = req.params
-    const deletedProduct = await Product.findOneAndDelete({_id: inventoryId})
+    const {productId} = req.params
+    const deletedProduct = await Product.findOneAndDelete({product: productId})
     if(!deletedProduct) {
       return res.status(404).json({success: false, message: "inventory not deleted"});
     }

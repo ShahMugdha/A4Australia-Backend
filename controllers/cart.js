@@ -207,7 +207,7 @@ export const moveProductToWishList = async(req, res) => {
     }
     const movedProduct = await WishList.findOneAndUpdate(
       {user: {_id: req.userData._id}},
-      {$push: {products: removedProduct.cart.product}}
+      {$push: {products: productId}}
     )
     if(!movedProduct) {
       return res.status(404).json({success: false, message: "product not moved to wishlist"});

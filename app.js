@@ -2,6 +2,8 @@ import express from 'express';
 import {connectDB} from './utils/database.js';
 import env from 'dotenv';
 import cors from 'cors';
+/* import path from 'path';
+const __dirname = path.resolve(); */
 env.config({path: './'});
 // initialize
 connectDB();

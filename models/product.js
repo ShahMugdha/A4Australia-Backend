@@ -6,9 +6,7 @@ const productSchema = new mongoose.Schema({
     type: String,
     unique: true
   },
-  imageUrl: {
-    type: [String]
-  },
+  image: String,
   description: {
     type: String
   },

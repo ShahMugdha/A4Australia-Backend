@@ -39,8 +39,9 @@ export const createPaymentIntent = async(req, res) => {
       // Create the PaymentIntent
       intent = await stripe.paymentIntents.create({
         payment_method: req.body.payment_method_id,
-        amount: cart.totalPrice,
+        amount: cart.totalPrice * 100,
         currency: 'inr',
+        receipt_email: cart.user.email,
         confirmation_method: 'manual',
         confirm: true
       });
