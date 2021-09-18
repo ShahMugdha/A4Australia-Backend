@@ -12,8 +12,8 @@ import {
   deleteProduct
 } from '../controllers/product.js';
 
-router.post('/', verifyToken, upload, verifyAdmin, addProduct);
-router.patch('/:productId', verifyToken, verifyAdmin, updateProduct);
+router.post('/', verifyToken, verifyAdmin, upload, addProduct);
+router.patch('/:productId', verifyToken, verifyAdmin, upload, updateProduct);
 router.get('/', getProductList);
 router.delete('/:productId', verifyToken, verifyAdmin, deleteProduct);
 router.get('/:category', getProductsByCategory);

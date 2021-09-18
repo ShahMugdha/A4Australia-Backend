@@ -69,7 +69,7 @@ export const addProductToCart = async(req, res) => {
   }
 }
 
-export const updateProductDetails = async(req, res) => {
+/* export const updateProductDetails = async(req, res) => {
   try {
     const { productId, size }= req.params;
     const {Size, quantity} = req.query
@@ -103,24 +103,33 @@ export const updateProductDetails = async(req, res) => {
   catch(err) {
     return res.status(500).json({success: false, message: "something went wrong", result: err});
   }
-}
+} */
 
 export const updateProductSize = async(req, res) => {
   try {
     const { productId, originalSize, updatedSize }= req.params
     const existingSize = await Cart.findOne({user: req.userData, cart: {$elemMatch: {product: {_id: productId}, size: updatedSize}}}, {"cart.$": 1})
+    console.log(existingSize.cart[0], "existing size")
     if(existingSize) {
       const updatedProductQuantity = await Cart.findOneAndUpdate(
         {user: req.userData, cart: {$elemMatch: {product: {_id: productId}, size: updatedSize}}},
-        {$pull: {cart: {product: {_id: productId}, size: originalSize}}},
-        {$set: {$inc: {cart: {price: existingSize.cart[0].price, quantity: existingSize.cart[0].quantity}}}},
+        {$inc: {'cart.$.price': existingSize.cart[0].price, 'cart.$.quantity': existingSize.cart[0].quantity}},
         {new : true}
       );
-      console.log(updatedProductQuantity, "quantity updated")
-      if(!updatedProductQuantity) {
-        return res.status(404).json({success: false, message: "product quantity not updated"});
+      console.log(updatedProductQuantity, "quantity and price updated")
+      if (updatedProductQuantity) {
+        const deletedProductwithSameSize = await Cart.findOneAndUpdate(
+          {user: req.userData, cart: {$elemMatch: {product: {_id: productId}, size: updatedSize}}},
+          {$pull: {cart: {product: {_id: productId}, size: originalSize}}},
+          {new : true}
+        )
+        console.log(deletedProductwithSameSize, "deleted")
+        if(!deletedProductwithSameSize) {
+          return res.status(404).json({success: false, message: "product not deleted"});
+        }
+        return res.status(201).json({success: true, message: "product deleted", result: deletedProductwithSameSize});
       }
-      return res.status(201).json({success: true, message: "product details updated with quantity", result: updatedProductQuantity});
+      return res.status(404).json({success: false, message: "product quantity not updated", result: deletedProductwithSameSize});
     }
 
     const updatedProductSize = await Cart.findOneAndUpdate(
@@ -144,10 +153,10 @@ export const updateProductQuantity = async(req, res) => {
     const product = await Product.findById(productId)
     const cartProduct = await Cart.findOne({user: req.userData, cart: {$elemMatch: {product: {_id: productId}, size}}}, {"cart.$": 1})
     const previousQuantity = cartProduct.cart[0].quantity
-    const absDiff = Math.abs(previousQuantity - quantity)
+    const diff = quantity - previousQuantity
     const updatedProductQuantity = await Cart.findOneAndUpdate(
       {user: {_id: req.userData._id}, cart: {$elemMatch: {product: {_id: productId}, size}}},
-      { $set:  {'cart.$.quantity': quantity, 'cart.$.price': product.price * quantity}, $inc: {totalQuantity: absDiff, totalPrice: absDiff * product.price}}, 
+      { $set:  {'cart.$.quantity': quantity, 'cart.$.price': product.price * quantity}, $inc: {totalQuantity: diff, totalPrice: diff * product.price}}, 
       { new : true }
     );
     if(!updatedProductQuantity) {
@@ -179,7 +188,7 @@ export const deleteProductFromCart = async(req, res) => {
     console.log(deletedProduct, "deleted from cart")
 
     const updatedQuantityAndPrice = await Cart.findOneAndUpdate(
-      {_id: deletedProduct._id},
+      {user: req.userData},
       {$inc: {totalQuantity: -quantity, totalPrice: -price}},
       {new: true}
     )
@@ -197,6 +206,10 @@ export const deleteProductFromCart = async(req, res) => {
 export const moveProductToWishList = async(req, res) => {
   try {
     const {productId, size} = req.params
+    const product = await Product.findById(productId)
+    const cartProduct = await Cart.findOne({user: req.userData, cart: {$elemMatch: {product: {_id: productId}, size}}}, {"cart.$": 1})
+    const quantity = cartProduct.cart[0].quantity
+    const price = product.price
     const removedProduct = await Cart.findOneAndUpdate(
       {user: {_id: req.userData._id}, cart: {$elemMatch: {product: {_id: productId}, size}}}, 
       {$pull: {cart: {product: {_id: productId}, size}}},
@@ -205,6 +218,15 @@ export const moveProductToWishList = async(req, res) => {
     if(!removedProduct) {
       return res.status(404).json({success: false, message: "product not found in cart"});
     }
+    const updatedQuantityAndPrice = await Cart.findOneAndUpdate(
+      {user: req.userData},
+      {$inc: {totalQuantity: -quantity, totalPrice: -price}},
+      {new: true}
+    )
+    console.log(updatedQuantityAndPrice, "deleted from cart & cart updated")
+    if(!updatedQuantityAndPrice) {
+      return res.status(404).json({success: false, message: "total quantity and price not updated"});
+    } 
     const movedProduct = await WishList.findOneAndUpdate(
       {user: {_id: req.userData._id}},
       {$push: {products: productId}}
@@ -213,6 +235,19 @@ export const moveProductToWishList = async(req, res) => {
       return res.status(404).json({success: false, message: "product not moved to wishlist"});
     }
     return res.status(200).json({success: true, message: "product moved to wishlist", result: movedProduct});
+  }
+  catch(err) {
+    return res.status(500).json({success: false, message: "something went wrong", result: err});
+  }
+}
+
+export const deleteCart = async(req, res) => {
+  try {
+    const deletedCart = await Cart.findOneAndDelete({user: req.userData}).populate('user').populate('cart.product')
+    if(!deletedCart) {
+      return res.status(404).json({success: false, message: "cart not deleted"});
+    }
+    return res.status(200).json({success: true, message: "cart deleted", result: deletedCart});
   }
   catch(err) {
     return res.status(500).json({success: false, message: "something went wrong", result: err});

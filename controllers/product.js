@@ -90,11 +90,19 @@ export const addProduct = async(req, res) => {
 export const updateProduct = async(req, res) => {
   try {
     const productData = req.body
+    const image = req.file.path
     const { productId }= req.params;
+    var productEdit
+    if(image) {
+      productEdit = {productData, image}
+    }
+    else {
+      productEdit = {productData}
+    }
 
     const product = await Product.findOneAndUpdate(
       {_id : productId},
-      { $set: productData }, 
+      { $set: productEdit }, 
       { new : true }
     );
     if(!product) {

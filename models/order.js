@@ -1,22 +1,36 @@
 import mongoose from "mongoose";
 
 const orderSchema = new mongoose.Schema({
-  cart: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'cart'
-  },
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'user'
   },
-  total: {
+  order: [{
+    product: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'product',
+      unique: true
+    },
+    size: {
+      type: String,
+      enum: ["Small", "Medium", "Large"]
+    },
+    quantity: {
+      type: Number,
+      default: 1
+    },
+    price: {
+      type: Number,
+      default: 0
+    }
+  }],
+  totalQuantity: {
+    type: Number,
+    default: 1
+  },
+  totalPrice: {
     type: Number,
     default: 0
-  },
-  status: {
-    type: String,
-    default: 'Not processed',
-    enum: ['Not processed', 'Processing', 'Shipped', 'Delivered', 'Cancelled']
   }
 }, {
   timestamps: true,

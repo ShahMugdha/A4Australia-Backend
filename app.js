@@ -17,18 +17,20 @@ import authRoute from './routes/auth.js'
 import productRoute from './routes/product.js'
 import cartRoute from './routes/cart.js'
 import orderRoute from './routes/order.js'
+import transactionRoute from './routes/transaction.js'
 import addressRoute from './routes/address.js'
 import profileRoute from './routes/profile.js'
 import wishListRoute from './routes/wishlist.js'
 import inventoryRoute from './routes/inventory.js'
 import paymentRoute from './routes/payment.js'
 
-app.use(express.static('uploads'));
+app.use("/uploads", express.static('uploads'));
 
 app.use('/api/v1/auth', authRoute)
 app.use('/api/v1/product', productRoute)
 app.use('/api/v1/cart', cartRoute)
 app.use('/api/v1/order', orderRoute)
+app.use('/api/v1/transaction', transactionRoute)
 app.use('/api/v1/address', addressRoute)
 app.use('/api/v1/profile', profileRoute)
 app.use('/api/v1/wishlist', wishListRoute)

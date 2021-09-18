@@ -1,19 +1,16 @@
 import express from 'express';
 const router = express.Router();
 import { verifyToken, verifyAdmin } from "../middleware/verifyToken.js";
-
 import {
+  getMyOrder,
+  getCustomerOrder,
   createOrder,
-  getOrder,
-  cancelOrder,
-  cancelItem,
-  dashboard
-} from '../controllers/order.js'
+  getAllOrders
+} from '../controllers/order.js';
 
-router.post('/create', verifyToken, createOrder)
-router.get('/:orderId', verifyToken, getOrder)
-router.delete('/cancel/:orderId', verifyToken, cancelOrder)
-router.put('/cancel/item/:itemId', verifyToken, cancelItem)
-router.get('/', verifyToken, verifyAdmin, dashboard)
+router.post('/', verifyToken, createOrder);
+router.get('/my-order', verifyToken, getMyOrder);
+router.get('/:userId', verifyToken, verifyAdmin, getCustomerOrder);
+router.get('/all-orders', verifyToken, verifyAdmin, getAllOrders);
 
-export default router
+export default router;
