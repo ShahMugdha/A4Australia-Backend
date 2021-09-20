@@ -4,11 +4,11 @@ import Order from '../models/order.js'
 
 export const getMyOrder = async(req, res) => {
   try {
-    const order = await Order.find({user: req.userData}).populate('user').populate('order.product')
+    const order = await Order.findOne({user: req.userData}).populate('user').populate('order.product')
     if(!order) {
       return res.status(404).json({success: false, message: "order not found"});
     }
-    return res.status(200).json({success: true, message: "retrieved order", result: cart});
+    return res.status(200).json({success: true, message: "retrieved order", result: order});
   }
   catch(err) {
     return res.status(500).json({success: false, message: "something went wrong", result: err});
@@ -31,7 +31,7 @@ export const getCustomerOrder = async(req, res) => {
 
 export const getAllOrders = async(req, res) => {
   try {
-    const order = await Order.find()
+    const order = await Order.find({})
     if(!order) {
       return res.status(404).json({success: false, message: "orders not found"});
     }
