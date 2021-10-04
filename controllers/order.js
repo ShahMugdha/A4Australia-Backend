@@ -51,7 +51,7 @@ export const createOrder = async(req, res) => {
     if (cart && !userOrderExists) {
       const order = await Order.create({
         user,
-        order: cart.cart,
+        orderHistory:{order: cart.cart},
         totalPrice: cart.totalPrice,
         totalQuantity: cart.totalQuantity
       });
@@ -64,7 +64,7 @@ export const createOrder = async(req, res) => {
     if(cart && userOrderExists) {
       const newOrder = await Order.findOneAndUpdate(
         {user: req.userData},
-        {$addToSet: {order: [cart.cart]}, $inc: {totalQuantity: cart.totalQuantity, totalPrice: cart.totalPrice}},
+        {$addToSet: {orderHistory: {order: cart.cart}}, $inc: {totalQuantity: cart.totalQuantity, totalPrice: cart.totalPrice}},
         {new: true}
       )
       if(!newOrder) {

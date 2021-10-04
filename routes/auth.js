@@ -1,22 +1,26 @@
 import express from "express";
+const router = express.Router();
 import {
     login,
     signUp,
     verifyEmail,
-    changePassword
+    ForgotPassword,
+    changePassword,
+    verifyOtp
 } from "../controllers/auth.js";
 import {
-    loginValidation, signupValidation,
-    changePasswordValidation, forgotPasswordValidation, verifyOtpValidation
+    loginValidation, 
+    signupValidation,
+    changePasswordValidation, 
+    forgotPasswordValidation, 
+    verifyOtpValidation
 } from "../utils/validation/auth.js";
-const router = express.Router();
 
-//sign up user
 router.post('/signup', signupValidation, signUp)
-
-// for login user
 router.post("/login",loginValidation, login);
 router.get('/verify-email/:userId', verifyEmail)
-
+router.patch("/forgot-password", forgotPasswordValidation, ForgotPassword);
+router.patch("/verify-Otp", verifyOtpValidation, verifyOtp);
+router.patch("/password", changePasswordValidation, changePassword);
 
 export default router;

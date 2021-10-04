@@ -26,7 +26,7 @@ const cartSchema = new mongoose.Schema({
   }],
   totalQuantity: {
     type: Number,
-    default: 1
+    default: 0
   },
   totalPrice: {
     type: Number,

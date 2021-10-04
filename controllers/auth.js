@@ -83,11 +83,10 @@ export const login = async(req, res) => {
 export const ForgotPassword = async (req, res, next) => {
   try {
     const {email} = req.body;
-    console.log(req.body);
     const otp = Math.floor(100000 + Math.random() * 900000);
     const expTime = Date.now() + 3600000;
 
-    const updateUserData = await Accounts.findOneAndUpdate({email: email}, {otp: otp, otpExpires: expTime}, {new: true});
+    const updateUserData = await User.findOneAndUpdate({email: email}, {otp: otp, otpExpires: expTime}, {new: true});
     if (!updateUserData) {
       return res.status(404).json({success: false, message: 'Email not Found'});
     }
@@ -95,7 +94,7 @@ export const ForgotPassword = async (req, res, next) => {
 
     return res.status(200).json({
       success: true,
-      result: true,
+      result: updateUserData,
       message: 'Otp Send Successfully',
     });
   }
@@ -109,7 +108,7 @@ export const verifyOtp = async (req, res, next) => {
     const {email, otp} = req.body;
     const currentTime = Date.now();
 
-    const updateUserData = await Accounts.findOne({
+    const updateUserData = await User.findOne({
       email: email,
       otp: otp,
       otpExpires: {$gt: currentTime},
@@ -136,7 +135,7 @@ export const changePassword = async (req, res, next) => {
     const passwordSalt = await bcrypt.genSalt(saltRounds);
     const pass = await bcrypt.hash(password, passwordSalt);
 
-    const updateUserData = await Accounts.findOneAndUpdate({_id: _id}, {$set: {password: pass, otp: 0}}, {new: true});
+    const updateUserData = await User.findOneAndUpdate({_id: _id}, {$set: {password: pass, otp: 0}}, {new: true});
     if (!updateUserData) {
       return res.status(404).json({success: false, message: 'Error While Change Your Password'});
     }

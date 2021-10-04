@@ -106,28 +106,38 @@ export const updateInventoryStock = async(req, res) => {
   }
 }
 
-/* export const deleteInventoryStock = async(req, res) => {
+export const deleteProductQuantity = async(req, res) => {
   try {
-    const {inventoryId} = req.params
-    const deletedProduct = await Product.findOneAndDelete({_id: inventoryId})
-    if(!deletedProduct) {
-      return res.status(404).json({success: false, message: "inventory not deleted"});
+    const {productId} = req.params
+    const {size, quantity} = req.body
+    const existingStock = await Inventory.findOne({product: {_id: productId}, stock: {$elemMatch : {size}}}, {"stock.$": 1})
+    console.log(existingStock, "stock exists")
+    if(existingStock) {
+      const updatedStockWithSameSize = await Inventory.findOneAndUpdate(
+        {product: {_id: productId}, stock: {$elemMatch : {size}}},
+        {$inc: {'stock.$.quantity': -quantity}},
+        {new : true}
+      );
+      console.log(updatedStockWithSameSize, "quantity decreased")
+      if(!updatedStockWithSameSize) {
+        return res.status(404).json({success: false, message: "quantity of product not deleted with same size"});
+      }
+      return res.status(200).json({success: true, message: "quantity decreased", result: updatedStockWithSameSize});
     }
-    return res.status(200).json({success: true, message: "inventory deleted", result: deletedProduct});
   }
   catch(err) {
-    return res.status(500).json({success: true, message: "something went wrong", result: err});
+    return res.status(500).json({success: false, message: "something went wrong", result: err});
   }
-} */
+} 
 
 export const deleteProductInventory = async(req, res) => {
   try {
     const {productId} = req.params
-    const deletedProduct = await Product.findOneAndDelete({product: productId})
-    if(!deletedProduct) {
+    const deletedProductStock = await Inventory.findOneAndDelete({product: productId})
+    if(!deletedProductStock) {
       return res.status(404).json({success: false, message: "inventory not deleted"});
     }
-    return res.status(200).json({success: true, message: "inventory deleted", result: deletedProduct});
+    return res.status(200).json({success: true, message: "inventory deleted", result: deletedProductStock});
   }
   catch(err) {
     return res.status(500).json({success: true, message: "something went wrong", result: err});

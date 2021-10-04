@@ -5,24 +5,26 @@ const orderSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'user'
   },
-  order: [{
-    product: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'product',
-      unique: true
-    },
-    size: {
-      type: String,
-      enum: ["Small", "Medium", "Large"]
-    },
-    quantity: {
-      type: Number,
-      default: 1
-    },
-    price: {
-      type: Number,
-      default: 0
-    }
+  orderHistory: [{
+    order : [{
+      product: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'product',
+        unique: true
+      },
+      size: {
+        type: String,
+        enum: ["Small", "Medium", "Large"]
+      },
+      quantity: {
+        type: Number,
+        default: 1
+      },
+      price: {
+        type: Number,
+        default: 0
+      }
+    }]   
   }],
   totalQuantity: {
     type: Number,

@@ -109,7 +109,26 @@ export const moveProductToCart = async(req, res) => {
         return res.status(404).json({success: false, message: "your cart is still empty"});
       }
       console.log(createdCart, "cart create")
-      return res.status(201).json({success: true, message: "moved the first product with size to cart", result: createdCart});
+      //return res.status(201).json({success: true, message: "moved the first product with size to cart", result: createdCart});
+      const updatedCart = await Cart.findOneAndUpdate(
+        {user: req.userData},
+        {$inc: {totalQuantity: 1, totalPrice: product.price}},
+        {new: true}
+      ).populate('products')
+      console.log(updatedCart, "cart updated with total quantity after creation")
+      if(!updatedCart) {
+        return res.status(404).json({success: false, message: "cart not updated after creation"});
+      }
+      
+      const selectedProduct = await WishList.findOneAndUpdate(
+        {user: {_id: req.userData._id}},
+        {$pull: { products: productId}}
+      ).populate('products')
+      console.log(selectedProduct, "deleted from wishlist after cart create")
+      if(!selectedProduct) {
+        return res.status(404).json({success: false, message: "product not deleted from wishlist after cart create"});
+      }
+      return res.status(200).json({success: true, message: "product deleted from wishlist and moved to cart create", result: updatedCart});
     }
     
     const existingProductWithSize = await Cart.findOne({user: req.userData, cart: {$elemMatch: {product: {_id: productId}, size}}})
@@ -135,6 +154,7 @@ export const moveProductToCart = async(req, res) => {
       {$inc: {totalQuantity: 1, totalPrice: product.price}},
       {new: true}
     ).populate('products')
+    console.log(updatedCart, "cart updated with total quantity")
     if(!updatedCart) {
       return res.status(404).json({success: false, message: "cart not updated"});
     }
@@ -143,6 +163,7 @@ export const moveProductToCart = async(req, res) => {
       {user: {_id: req.userData._id}},
       {$pull: { products: productId}}
     ).populate('products')
+    console.log(selectedProduct, "deleted from wishlist")
     if(!selectedProduct) {
       return res.status(404).json({success: false, message: "product not deleted from wishlist"});
     }

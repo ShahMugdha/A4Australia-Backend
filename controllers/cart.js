@@ -1,6 +1,7 @@
 import Product from '../models/product.js'
 import Cart from '../models/cart.js'
 import WishList from '../models/wishlist.js'
+import Inventory from '../models/inventory.js'
 
 export const getCartList = async(req, res) => {
   try {
@@ -39,7 +40,7 @@ export const addProductToCart = async(req, res) => {
     if (!userExists) {
       const cart = await Cart.create({
         user,
-        cart: {product, size, price: product.price},
+        cart: {product, size, quantity, price: product.price},
         totalPrice: product.price,
         totalQuantity: 1
       });
@@ -108,8 +109,9 @@ export const addProductToCart = async(req, res) => {
 export const updateProductSize = async(req, res) => {
   try {
     const { productId, originalSize, updatedSize }= req.params
+    console.log(req.params, "params")
     const existingSize = await Cart.findOne({user: req.userData, cart: {$elemMatch: {product: {_id: productId}, size: updatedSize}}}, {"cart.$": 1})
-    console.log(existingSize.cart[0], "existing size")
+    console.log(existingSize, "existing size")
     if(existingSize) {
       const updatedProductQuantity = await Cart.findOneAndUpdate(
         {user: req.userData, cart: {$elemMatch: {product: {_id: productId}, size: updatedSize}}},
