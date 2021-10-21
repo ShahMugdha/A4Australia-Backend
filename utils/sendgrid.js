@@ -1,7 +1,6 @@
 import env from 'dotenv';
 env.config({path: '../../'});
 import sendGridMail from '@sendgrid/mail';
-sendGridMail.setApiKey('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');
 console.log(process.env.SENDGRID_API_KEY, "key")
 
 export const sendMail = async (to, html) => {
