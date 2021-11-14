@@ -161,7 +161,8 @@ export const moveProductToCart = async(req, res) => {
     
     const selectedProduct = await WishList.findOneAndUpdate(
       {user: {_id: req.userData._id}},
-      {$pull: { products: productId}}
+      {$pull: { products: productId}},
+      {new: true}
     ).populate('products')
     console.log(selectedProduct, "deleted from wishlist")
     if(!selectedProduct) {

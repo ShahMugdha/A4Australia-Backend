@@ -27,7 +27,7 @@ export const signUp = async(req, res) => {
     if(!user) {
       return res.status(404).json({success: false, message: "user not created"});
     }
-    console.log(user)
+    console.log(user, "created")
     const project = role === 'CUSTOMER' ? `http://localhost:3000/` : `http://localhost:3000/admin/`;
     const verifyLink = `http://localhost:3000/verify-email/${user._id}`;
     await sendMail(email, `<p>${verifyLink}</p>`); 
@@ -91,7 +91,6 @@ export const ForgotPassword = async (req, res, next) => {
       return res.status(404).json({success: false, message: 'Email not Found'});
     }
     await sendMail(email, `<p>Your otp is : ${otp}</p>`);
-
     return res.status(200).json({
       success: true,
       result: updateUserData,

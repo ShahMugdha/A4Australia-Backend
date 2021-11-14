@@ -8,9 +8,9 @@ import {
   getAllOrders
 } from '../controllers/order.js';
 
-router.post('/', verifyToken, createOrder);
+router.post('/:paymentIntentId', verifyToken, createOrder);
 router.get('/my-order', verifyToken, getMyOrder);
-router.get('/:userId', verifyToken, verifyAdmin, getCustomerOrder);
+router.get('/:paymentIntentId', verifyToken, verifyAdmin, getCustomerOrder);
 router.get('/all-orders', verifyToken, verifyAdmin, getAllOrders);
 
 export default router;

@@ -1,5 +1,6 @@
 import Stripe from 'stripe';
-import Cart from '../models/cart.js'
+import Cart from '../models/cart.js';
+import Address from '../models/address.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
@@ -19,8 +20,9 @@ const generateResponse = (intent) => {
   } else if (intent.status === 'succeeded') {
     // The payment didn’t need any additional actions and completed!
     // Handle post-payment fulfillment
+    console.log(intent.id, "intent result")
     return {
-      success: true
+      success: true, paymentIntentId: intent.id
     };
   } else {
     // Invalid status
@@ -34,13 +36,28 @@ export const createPaymentIntent = async(req, res) => {
   try {
     const {userId} = req.params
     const cart = await Cart.findOne({user: {_id: userId}}).populate('user')
+    const address = await Address.findOne({user: {_id: userId}})
+    const count = address.addresses.length
+    const orderAddress = address.addresses[count-1] 
     let intent;
     if (req.body.payment_method_id) {
-      // Create the PaymentIntent
       intent = await stripe.paymentIntents.create({
         payment_method: req.body.payment_method_id,
         amount: cart.totalPrice * 100,
         currency: 'inr',
+        shipping: {
+          address: {
+            city: orderAddress.city,
+            //country: orderAddress.country,
+            line1: orderAddress.addressLine1,
+            line2: orderAddress.addressLine2,
+            postal_code: orderAddress.postalCode,
+            state: orderAddress.state
+          },
+          //email: cart && cart.user ? cart.user.email: null,
+          name: cart && cart.user ? cart.user.name: null,
+          phone: cart && cart.user ? cart.user.mobile: null
+        },
         receipt_email: cart.user.email,
         confirmation_method: 'manual',
         confirm: true

@@ -6,12 +6,13 @@ const orderSchema = new mongoose.Schema({
     ref: 'user'
   },
   orderHistory: [{
+    paymentIntentId:Object,
     order : [{
       product: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'product',
         unique: true
-      },
+      }, 
       size: {
         type: String,
         enum: ["Small", "Medium", "Large"]
@@ -24,7 +25,8 @@ const orderSchema = new mongoose.Schema({
         type: Number,
         default: 0
       }
-    }]   
+    }], 
+    date: Date
   }],
   totalQuantity: {
     type: Number,
