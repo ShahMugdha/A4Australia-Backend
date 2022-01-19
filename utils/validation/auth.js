@@ -78,7 +78,7 @@ export const changePasswordValidation = async (req, res, next) => {
   try {
     const schema = Joi.object().keys({
       password: Joi.string().required(),
-      _id: Joi.string().required(),
+      email: Joi.string().email().required(),
     });
     const { error } = schema.validate(req.body);
     if (error) {

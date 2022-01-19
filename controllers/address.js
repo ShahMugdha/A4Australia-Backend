@@ -28,7 +28,7 @@ export const addAddress = async(req, res) => {
         }
       });
       if(!address) {
-        return res.status(404).json({success: false, message: "address not created"});
+        return res.status(200).json({success: false, message: "address not created"});
       }
       return res.status(201).json({success: true, message: "address created", result: address});
     }
@@ -61,7 +61,7 @@ export const addAddress = async(req, res) => {
         {new: true}
       )
       if(!newAddress) {
-        return res.status(404).json({success: false, message: "new address not added "});
+        return res.status(200).json({success: false, message: "new address not added "});
       }
       return res.status(201).json({success: true, message: "new address added", result: newAddress});
       
@@ -77,7 +77,7 @@ export const getAllAddresses = async(req, res) => {
   try {
     const addresses = await Address.find().populate('user')
     if(!addresses) {
-      return res.status(404).json({success: false, message: "address list not found"});
+      return res.status(200).json({success: false, message: "address list not found"});
     }
     return res.status(200).json({success: true, message: "retrieved address list", result: addresses});
   }
@@ -91,7 +91,7 @@ export const getMyAddress = async(req, res) => {
     const userId = req.userData._id
     const address = await Address.findOne({user: {_id: userId}})
     if(!address) {
-      return res.status(404).json({success: false, message: "address not found"});
+      return res.status(200).json({success: false, message: "address not found"});
     }
     return res.status(200).json({success: true, message: "retrieved address", result: address});
   }
@@ -110,7 +110,7 @@ export const updateAddress = async(req, res) => {
       { new : true }
     )
     if(!updatedAddress) {
-      return res.status(404).json({success: false, message: "address not updated"});
+      return res.status(200).json({success: false, message: "address not updated"});
     }
     return res.status(201).json({success: true, message: "address updated", result: updatedAddress});
   }
@@ -128,7 +128,7 @@ export const removeAddress = async(req, res) => {
       {new: true}
     )
     if(!deletedAddress) {
-      return res.status(404).json({success: false, message: "address not deleted"});
+      return res.status(200).json({success: false, message: "address not deleted"});
     }
     return res.status(200).json({success: true, message: "address deleted", result: deletedAddress});
   }

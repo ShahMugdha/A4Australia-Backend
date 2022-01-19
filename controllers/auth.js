@@ -25,7 +25,7 @@ export const signUp = async(req, res) => {
       password: pass
     });
     if(!user) {
-      return res.status(404).json({success: false, message: "user not created"});
+      return res.status(200).json({success: false, message: "user not created"});
     }
     console.log(user, "created")
     const project = role === 'CUSTOMER' ? `http://localhost:3000/` : `http://localhost:3000/admin/`;
@@ -57,21 +57,21 @@ export const verifyEmail = async(req, res) => {
 export const login = async(req, res) => {
   try {
     const {email, password, role} = req.body
-    const getUserAccount = await User.find({
+    const getUserAccount = await User.findOne({
       email: email,
       role: role,
     }).select('+password') 
     if (!getUserAccount) {
-      return res.status(404).json({success: false, message: 'user Not Found '});
+      return res.status(200).json({success: false, message: 'user Not Found '});
     }
-    const checkPassword = await bcrypt.compare(password, getUserAccount[0].password);
-    if (!checkPassword) {
-      return res.status(403).json({success: false, message: 'Password did not match '});
+    const checkPassword = await bcrypt.compare(password, getUserAccount.password);
+    if (getUserAccount && !checkPassword) {
+      return res.status(200).json({success: false, message: 'Wrong Password '});
     }
     if (getUserAccount.isVerified === false) {
-      return res.status(401).json({success: false, message: 'Please verify your account first'});
+      return res.status(200).json({success: false, message: 'Please verify your account first'});
     }
-    const token = jwt.sign(JSON.stringify(getUserAccount[0]), process.env.JWT_AUTH_TOKEN);
+    const token = jwt.sign(JSON.stringify(getUserAccount), process.env.JWT_AUTH_TOKEN);
     const sendData = {userData: getUserAccount, token: token};
     return res.status(200).json({success: true, message: 'Login SuccessFull', result: sendData});
   }
@@ -80,7 +80,7 @@ export const login = async(req, res) => {
   }
 }
 
-export const ForgotPassword = async (req, res, next) => {
+export const ForgotPassword = async (req, res) => {
   try {
     const {email} = req.body;
     const otp = Math.floor(100000 + Math.random() * 900000);
@@ -88,13 +88,13 @@ export const ForgotPassword = async (req, res, next) => {
 
     const updateUserData = await User.findOneAndUpdate({email: email}, {otp: otp, otpExpires: expTime}, {new: true});
     if (!updateUserData) {
-      return res.status(404).json({success: false, message: 'Email not Found'});
+      return res.status(200).json({success: false, message: 'Email not Found'});
     }
     await sendMail(email, `<p>Your otp is : ${otp}</p>`);
     return res.status(200).json({
       success: true,
       result: updateUserData,
-      message: 'Otp Send Successfully',
+      message: `Otp Sent to email id ${email}`,
     });
   }
   catch(err) {
@@ -105,6 +105,7 @@ export const ForgotPassword = async (req, res, next) => {
 export const verifyOtp = async (req, res, next) => {
   try {
     const {email, otp} = req.body;
+    console.log(email, otp, "email otp")
     const currentTime = Date.now();
 
     const updateUserData = await User.findOne({
@@ -114,12 +115,12 @@ export const verifyOtp = async (req, res, next) => {
     });
 
     if (!updateUserData) {
-      return res.status(404).json({success: false, message: 'Otp Is Expire Or Not Match'});
+      return res.status(200).json({success: false, message: 'Otp expired or does not match'});
     }
     return res.status(200).json({
       success: true,
       result: updateUserData,
-      message: 'password Updated Successfully',
+      message: 'otp verified Successfully',
     });
   }
   catch(err) {
@@ -127,16 +128,15 @@ export const verifyOtp = async (req, res, next) => {
   }
 };
 // change password in forgot password
-export const changePassword = async (req, res, next) => {
+export const changePassword = async (req, res) => {
   try {
-    const {password, _id} = req.body;
-
-    const passwordSalt = await bcrypt.genSalt(saltRounds);
+    const {email, password} = req.body;
+    const passwordSalt = await bcrypt.genSalt(10);
     const pass = await bcrypt.hash(password, passwordSalt);
-
-    const updateUserData = await User.findOneAndUpdate({_id: _id}, {$set: {password: pass, otp: 0}}, {new: true});
+    const updateUserData = await User.findOneAndUpdate({email: email}, {$set: {password: pass, otp: 0}}, {new: true});
+    console.log(updateUserData, "change pass")
     if (!updateUserData) {
-      return res.status(404).json({success: false, message: 'Error While Change Your Password'});
+      return res.status(200).json({success: false, message: 'Error While Change Your Password'});
     }
     return res.status(200).json({success: true, message: 'Password Changed Successfully', result: true});
   }
