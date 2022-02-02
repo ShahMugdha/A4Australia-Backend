@@ -1,13 +1,11 @@
 import mongoose from 'mongoose';
-//import Accounts from '../models/Account.model.js';
-
-import bcrypt from 'bcrypt';
-const saltRounds = 10;
+import env from 'dotenv';
+env.config();
 
 const connectDB = async () => {
   const conn = await mongoose
     .connect(
-      `mongodb+srv://MugdhaShah:mugdha123@cluster0-ms17e.mongodb.net/Ecommerce`,
+      process.env.MONGODB_URI,
       {
         useNewUrlParser: true,
         useFindAndModify: false,
