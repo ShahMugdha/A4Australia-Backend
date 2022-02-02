@@ -10,7 +10,7 @@ export const signUp = async(req, res) => {
     const {firstName, lastName, email, mobile, role, password} = req.body;
     const alreadyExists = await User.findOne({email: email, mobile: mobile});
     if (alreadyExists) {
-      return res.status(403).json({success: false, message: 'This email id or mobile number already exists!'});
+      return res.status(200).json({success: false, message: 'This email id or mobile number already exists!'});
     } 
     const passwordSalt = await bcrypt.genSalt(10);
     const pass = await bcrypt.hash(password, passwordSalt);
@@ -30,7 +30,7 @@ export const signUp = async(req, res) => {
     console.log(user, "created")
     const project = role === 'CUSTOMER' ? `http://localhost:3000/` : `http://localhost:3000/admin/`;
     const verifyLink = `http://localhost:3000/verify-email/${user._id}`;
-    await sendMail(email, `<p>${verifyLink}</p>`); 
+    await sendMail(email, `<div>Please click on the link below link to verify your account</div><p>${verifyLink}</p>`); 
     return res.status(201).json({success: true, message: "user created", result: user});  
   }
   catch(err) {
@@ -45,9 +45,10 @@ export const verifyEmail = async(req, res) => {
       {_id: userId},
       {$set: {isVerified: true}}
     )
-    if(verifyUser) {
-      return res.status(200).json({success: true, message: "user verified", result: verifyUser});
-    }
+    if(!verifyUser) {
+      return res.status(200).json({success: false, message: "user not verified"});
+    }  
+    return res.status(200).json({success: true, message: "user verified", result: verifyUser});
   }
   catch(err) {
     return res.status(500).json({success: false, message: "something went wrong", result: err});

@@ -139,8 +139,8 @@ export const moveProductToCart = async(req, res) => {
 
     const product = await Product.findById(productId)
     const movedProduct = await Cart.findOneAndUpdate(
-      {user: {_id: req.userData._id}},
-      {$push: { cart: {product: {_id: productId}, size, price: product.price}}},
+      {user: req.userData},
+      {$push: { cart: {product, size, price: product.price}}},
       {new: true}
     ).populate('products')
     console.log(movedProduct, "moved product in cart")
@@ -172,6 +172,6 @@ export const moveProductToCart = async(req, res) => {
     
   }
   catch(err) {
-    return res.status(500).json({success: false, message: "something went wrong", result: err});
+    return res.status(200).json({success: false, message: "something went wrong", result: err});
   }
 }
