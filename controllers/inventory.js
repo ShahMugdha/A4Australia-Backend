@@ -25,23 +25,23 @@ export const getInventoryList = async (req, res) => {
 
 export const getParticularProductInventory = async (req, res) => {
   try {
-    const { productId } = req.params;
+    const { productId, size } = req.params;
     const inventory = await Inventory.findOne({
-      product: { _id: productId },
-    }).populate("product");
+      product: { _id: productId }, stock: {$elemMatch: {size}}
+    },{ "stock.$": 1 }).populate("product");
     if (!inventory) {
       return res
         .status(200)
         .json({
           success: false,
-          message: "product inventory by this id not found",
+          message: "product inventory by this id and size not found",
         });
     }
     return res
       .status(200)
       .json({
         success: true,
-        message: "retrieved product inventory by id",
+        message: "retrieved product inventory by id and size",
         result: inventory,
       });
   } catch (err) {
