@@ -103,7 +103,7 @@ export const moveProductToCart = async(req, res) => {
       const product = await Product.findById(productId)
       const createdCart = await Cart.create({
         user: req.userData,
-        cart: {productCart: {_id: productId}, size, price: product.price}
+        cart: {product, size, price: product.price}
       })
       console.log(createdCart, "cart")
       if(!createdCart) {
@@ -113,7 +113,7 @@ export const moveProductToCart = async(req, res) => {
         {user: req.userData},
         {$inc: {totalQuantity: 1, totalPrice: product.price}},
         {new: true}
-      ).populate('productCart')
+      ).populate('product')
       console.log(updatedCart, "cart updated with total quantity after creation")
       if(!updatedCart) {
         return res.status(200).json({success: false, message: "cart not updated after creation"});
@@ -128,10 +128,15 @@ export const moveProductToCart = async(req, res) => {
       if(!selectedProduct) {
         return res.status(200).json({success: false, message: "product not deleted from wishlist after creating your cart"});
       }
+      const quantityCheck = await WishList.findOne({user: req.userData, products: {$size: 0}})
+      if(quantityCheck && quantityCheck.products.length === 0) {
+        const deleteWishListByUser = await WishList.findOneAndDelete({user: req.userData})
+        if(deleteWishListByUser) console.log("wishlist dropped")
+      }
       return res.status(200).json({success: true, message: "product deleted from wishlist and moved to your cart", result: updatedCart});
     }
     
-    const existingProductWithSize = await Cart.findOne({user: req.userData, cart: {$elemMatch: {productCart: {_id: productId}, size}}})
+    const existingProductWithSize = await Cart.findOne({user: req.userData, cart: {$elemMatch: {product: {_id: productId}, size}}})
     console.log(existingProductWithSize, "product with same size")
     if(existingProductWithSize) {
       return res.status(200).json({success: false, message: `product with ${size} size already exists in cart`});
@@ -140,9 +145,9 @@ export const moveProductToCart = async(req, res) => {
     const product = await Product.findById(productId)
     const movedProduct = await Cart.findOneAndUpdate(
       {user: req.userData},
-      {$push: { cart: {productCart: {_id: productId}, size, price: product.price}}},
+      {$push: { cart: {product, size, price: product.price}}},
       {new: true}
-    ).populate('productCart')
+    ).populate('product')
     console.log(movedProduct, "moved product in cart")
 
     if(!movedProduct) {
@@ -153,7 +158,7 @@ export const moveProductToCart = async(req, res) => {
       {user: req.userData},
       {$inc: {totalQuantity: 1, totalPrice: product.price}},
       {new: true}
-    ).populate('productCart')
+    ).populate('product')
     console.log(updatedCart, "cart updated with total quantity")
     if(!updatedCart) {
       return res.status(200).json({success: false, message: "cart not updated"});
@@ -167,6 +172,11 @@ export const moveProductToCart = async(req, res) => {
     console.log(selectedProduct, "deleted from wishlist")
     if(!selectedProduct) {
       return res.status(200).json({success: false, message: "product not deleted from wishlist"});
+    }
+    const quantityCheck = await WishList.findOne({user: req.userData, products: {$size: 0}})
+    if(quantityCheck && quantityCheck.products.length === 0) {
+      const deleteWishListByUser = await WishList.findOneAndDelete({user: req.userData})
+      if(deleteWishListByUser) console.log("wishlist dropped")
     }
     return res.status(200).json({success: true, message: "product deleted from wishlist and moved to cart", result: updatedCart});
     

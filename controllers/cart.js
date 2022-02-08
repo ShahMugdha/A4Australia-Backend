@@ -5,7 +5,7 @@ import Inventory from "../models/inventory.js";
 
 export const getCartList = async (req, res) => {
   try {
-    const cart = await Cart.find({ user: req.userData }).populate("user").populate("cart.productCart");
+    const cart = await Cart.find({ user: req.userData }).populate("user").populate("cart.product");
     if (!cart) {
       return res.status(200).json({ success: false, message: "cart list not found" });
     }
@@ -37,7 +37,7 @@ export const addProductToCart = async (req, res) => {
     if (!userExists) {
       const cart = await Cart.create({
         user,
-        cart: { productCart:{_id: productId}, size, quantity, price: product.price },
+        cart: { product:{_id: productId}, size, quantity, price: product.price },
         totalPrice: product.price,
         totalQuantity: 1,
       });
@@ -48,13 +48,13 @@ export const addProductToCart = async (req, res) => {
     }
     const productExists = await Cart.findOne({
       user,
-      cart: { $elemMatch: { productCart: { _id: productId }, size } },
+      cart: { $elemMatch: { product: { _id: productId }, size } },
     });
     if (!productExists) {
       const newProduct = await Cart.findOneAndUpdate(
         { user },
         { 
-          $addToSet: { cart: { productCart:{_id: productId}, size, price: product.price } },
+          $addToSet: { cart: { product:{_id: productId}, size, price: product.price } },
           $inc: { totalQuantity: 1, totalPrice: product.price },
         },
         { new: true }
@@ -77,14 +77,14 @@ export const updateProductSize = async (req, res) => {
     console.log(req.params, "params");
     const existingSize = await Cart.findOne({
       user: req.userData,
-      cart: {$elemMatch: { productCart: { _id: productId }, size: updatedSize }},
+      cart: {$elemMatch: { product: { _id: productId }, size: updatedSize }},
     },{ "cart.$": 1 });
     console.log(existingSize, "existing size");
     if (existingSize) {
       const updatedProductQuantity = await Cart.findOneAndUpdate(
         {
           user: req.userData,
-          cart: {$elemMatch: { productCart: { _id: productId }, size: updatedSize }},
+          cart: {$elemMatch: { product: { _id: productId }, size: updatedSize }},
         },
         {$inc: {"cart.$.price": existingSize.cart[0].price, "cart.$.quantity": existingSize.cart[0].quantity}},
         { new: true }
@@ -94,10 +94,10 @@ export const updateProductSize = async (req, res) => {
         const deletedProductwithSameSize = await Cart.findOneAndUpdate(
           {
             user: req.userData,
-            cart: {$elemMatch: { productCart: { _id: productId }, size: updatedSize }},
+            cart: {$elemMatch: { product: { _id: productId }, size: updatedSize }},
           },
           {
-            $pull: {cart: { productCart: { _id: productId }, size: originalSize }},
+            $pull: {cart: { product: { _id: productId }, size: originalSize }},
           },
           { new: true }
         );
@@ -113,7 +113,7 @@ export const updateProductSize = async (req, res) => {
     const updatedProductSize = await Cart.findOneAndUpdate(
       {
         user: req.userData,
-        cart: {$elemMatch: { productCart: { _id: productId }, size: originalSize }},
+        cart: {$elemMatch: { product: { _id: productId }, size: originalSize }},
       },
       { $set: { "cart.$.size": updatedSize } },
       { new: true }
@@ -134,7 +134,7 @@ export const updateProductQuantity = async (req, res) => {
     const cartProduct = await Cart.findOne(
       {
         user: req.userData,
-        cart: { $elemMatch: { productCart: { _id: productId }, size } },
+        cart: { $elemMatch: { product: { _id: productId }, size } },
       },
       { "cart.$": 1 }
     );
@@ -143,7 +143,7 @@ export const updateProductQuantity = async (req, res) => {
     const updatedProductQuantity = await Cart.findOneAndUpdate(
       {
         user: { _id: req.userData._id },
-        cart: { $elemMatch: { productCart: { _id: productId }, size } },
+        cart: { $elemMatch: { product: { _id: productId }, size } },
       },
       {
         $set: {
@@ -172,7 +172,7 @@ export const deleteProductFromCart = async (req, res) => {
     const cartProduct = await Cart.findOne(
       {
         user: req.userData,
-        cart: { $elemMatch: { productCart: { _id: productId }, size } },
+        cart: { $elemMatch: { product: { _id: productId }, size } },
       },
       { "cart.$": 1 }
     );
@@ -182,9 +182,9 @@ export const deleteProductFromCart = async (req, res) => {
     const deletedProduct = await Cart.findOneAndUpdate(
       {
         user: req.userData,
-        cart: { $elemMatch: { productCart: { _id: productId }, size } },
+        cart: { $elemMatch: { product: { _id: productId }, size } },
       },
-      { $pull: { cart: { productCart: { _id: productId }, size } } },
+      { $pull: { cart: { product: { _id: productId }, size } } },
       { new: true }
     );
     if (!deletedProduct) {
@@ -214,7 +214,7 @@ export const moveProductToWishList = async (req, res) => {
     const cartProduct = await Cart.findOne(
       {
         user: req.userData,
-        cart: { $elemMatch: { productCart: { _id: productId }, size } },
+        cart: { $elemMatch: { product: { _id: productId }, size } },
       },
       { "cart.$": 1 }
     );
@@ -223,9 +223,9 @@ export const moveProductToWishList = async (req, res) => {
     const removedProduct = await Cart.findOneAndUpdate(
       {
         user: { _id: req.userData._id },
-        cart: { $elemMatch: { productCart: { _id: productId }, size } },
+        cart: { $elemMatch: { product: { _id: productId }, size } },
       },
-      { $pull: { cart: { productCart: { _id: productId }, size } } },
+      { $pull: { cart: { product: { _id: productId }, size } } },
       { new: true }
     );
     if (!removedProduct) {
@@ -241,11 +241,16 @@ export const moveProductToWishList = async (req, res) => {
       return res.status(200).json({success: false, message: "total quantity and price not updated"});
     }
     const movedProduct = await WishList.findOneAndUpdate(
-      { user: { _id: req.userData._id } },
+      { user: req.userData },
       { $push: { products: productId } }
     );
     if (!movedProduct) {
       return res.status(200).json({ success: false, message: "product not moved to wishlist" });
+    }
+    const quantityCheck = await Cart.findOne({user: req.userData, cart: {$size: 0}})
+    if(quantityCheck && quantityCheck.cart.length === 0) {
+      const deleteCartByUser = await Cart.findOneAndDelete({user: req.userData})
+      if(deleteCartByUser) console.log("cart dropped") 
     }
     return res.status(200).json({success: true, message: "product moved to wishlist", result: movedProduct});
   } catch (err) {
@@ -255,9 +260,7 @@ export const moveProductToWishList = async (req, res) => {
 
 export const deleteCart = async (req, res) => {
   try {
-    const deletedCart = await Cart.findOneAndDelete({ user: req.userData })
-      .populate("user")
-      .populate("cart.product");
+    const deletedCart = await Cart.findOneAndDelete({ user: req.userData }).populate("user").populate("cart.product");
     if (!deletedCart) {
       return res.status(200).json({ success: false, message: "cart not deleted" });
     }

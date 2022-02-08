@@ -10,8 +10,7 @@ const orderSchema = new mongoose.Schema({
     order : [{
       product: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'product',
-        unique: true
+        ref: 'product'
       }, 
       size: {
         type: String,

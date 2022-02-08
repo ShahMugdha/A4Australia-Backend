@@ -6,10 +6,9 @@ const cartSchema = new mongoose.Schema({
     ref: 'user'
   },
   cart: [{
-    productCart: {
+    product: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'product'
-      //unique: true
     },
     size: {
       type: String,
