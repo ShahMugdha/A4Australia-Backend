@@ -9,7 +9,7 @@ export const getMyOrder = async (req, res) => {
     }
     return res.status(200).json({ success: true, message: "retrieved order", result: order });
   } catch (err) {
-    return res.status(500).json({ success: false, message: "something went wrong", result: err });
+    return res.status(200).json({ success: false, message: "something went wrong", result: err });
   }
 };
 
@@ -25,7 +25,7 @@ export const getCustomerOrder = async (req, res) => {
     }
     return res.status(200).json({ success: true, message: "retrieved order", result: order });
   } catch (err) {
-    return res.status(500).json({ success: false, message: "something went wrong", result: err });
+    return res.status(200).json({ success: false, message: "something went wrong", result: err });
   }
 };
 
@@ -37,7 +37,7 @@ export const getAllOrders = async (req, res) => {
     }
     return res.status(200).json({ success: true, message: "retrieved all orders", result: order });
   } catch (err) {
-    return res.status(500).json({ success: false, message: "something went wrong", result: err });
+    return res.status(200).json({ success: false, message: "something went wrong", result: err });
   }
 };
 
@@ -82,8 +82,8 @@ export const createOrder = async (req, res) => {
       }
       return res.status(201).json({ success: true, message: "new order added", result: newOrder });
     } else if (!cart)
-      return res.status(409).json({ success: false, message: "cart doesn't exist" });
+      return res.status(400).json({ success: false, message: " Your cart doesn't exist" });
   } catch (err) {
-    return res.status(500).json({ success: false, message: "something went wrong", result: err });
+    return res.status(200).json({ success: false, message: "something went wrong", result: err });
   }
 };

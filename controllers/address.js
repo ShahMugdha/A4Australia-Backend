@@ -66,10 +66,10 @@ export const addAddress = async(req, res) => {
       return res.status(201).json({success: true, message: "new address added", result: newAddress});
       
     }
-    return res.status(409).json({success: false, message: "This address is already saved"});
+    return res.status(200).json({success: false, message: "This address is already saved"});
   }
   catch(err) {
-    return res.status(500).json({success: false, message: "something went wrong", result: err});
+    return res.status(200).json({success: false, message: "something went wrong", result: err});
   }
 }
 
@@ -82,7 +82,7 @@ export const getAllAddresses = async(req, res) => {
     return res.status(200).json({success: true, message: "retrieved address list", result: addresses});
   }
   catch(err) {
-    return res.status(500).json({success: false, message: "something went wrong", result: err});
+    return res.status(200).json({success: false, message: "something went wrong", result: err});
   }
 }
 
@@ -96,7 +96,7 @@ export const getMyAddress = async(req, res) => {
     return res.status(200).json({success: true, message: "retrieved address", result: address});
   }
   catch(err) {
-    return res.status(500).json({success: false, message: "something went wrong", result: err});
+    return res.status(200).json({success: false, message: "something went wrong", result: err});
   }
 }
 
@@ -115,7 +115,7 @@ export const updateAddress = async(req, res) => {
     return res.status(201).json({success: true, message: "address updated", result: updatedAddress});
   }
   catch(err) {
-    return res.status(500).json({success: false, message: "something went wrong", result: err});
+    return res.status(200).json({success: false, message: "something went wrong", result: err});
   }
 }
 
@@ -133,6 +133,6 @@ export const removeAddress = async(req, res) => {
     return res.status(200).json({success: true, message: "address deleted", result: deletedAddress});
   }
   catch(err) {
-    return res.status(500).json({success: false, message: "something went wrong", result: err});
+    return res.status(200).json({success: false, message: "something went wrong", result: err});
   }
 }

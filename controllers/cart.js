@@ -11,7 +11,7 @@ export const getCartList = async (req, res) => {
     }
     return res.status(200).json({ success: true, message: "retrieved cart list", result: cart });
   } catch (err) {
-    return res.status(500).json({ success: false, message: "something went wrong", result: err });
+    return res.status(200).json({ success: false, message: "something went wrong", result: err });
   }
 };
 
@@ -20,11 +20,11 @@ export const getParticularProduct = async (req, res) => {
     const { productId } = req.params;
     const product = await Product.findById(productId);
     if (!product) {
-      return res.status(200).json({ success: false, message: "product by this title not found" });
+      return res.status(200).json({ success: false, message: `product by the title: ${product.title} not found` });
     }
-    return res.status(200).json({success: true, message: "retrieved product by title", result: product});
+    return res.status(200).json({success: true, message: `retrieved product by title: ${product.title}`, result: product});
   } catch (err) {
-    return res.status(500).json({ success: false, message: "something went wrong", result: err });
+    return res.status(200).json({ success: false, message: "something went wrong", result: err });
   }
 };
 
@@ -42,9 +42,9 @@ export const addProductToCart = async (req, res) => {
         totalQuantity: 1,
       });
       if (!cart) {
-        return res.status(200).json({ success: false, message: "new cart not created" });
+        return res.status(200).json({ success: false, message: "cart not created" });
       }
-      return res.status(201).json({success: true, message: "new cart created with one product", result: cart});
+      return res.status(201).json({success: true, message: "cart created with one product", result: cart});
     }
     const productExists = await Cart.findOne({
       user,
@@ -67,7 +67,7 @@ export const addProductToCart = async (req, res) => {
     }
     return res.status(200).json({success: false, message: "This product already exists in the cart"});
   } catch (err) {
-    return res.status(500).json({ success: false, message: "something went wrong", result: err });
+    return res.status(200).json({ success: false, message: "something went wrong", result: err });
   }
 };
 
@@ -103,11 +103,11 @@ export const updateProductSize = async (req, res) => {
         );
         console.log(deletedProductwithSameSize, "deleted");
         if (!deletedProductwithSameSize) {
-          return res.status(200).json({ success: false, message: "product not deleted" });
+          return res.status(400).json({ success: false, message: "product not deleted" });
         }
-        return res.status(201).json({success: true, message: "product deleted", result: deletedProductwithSameSize});
+        return res.status(201).json({success: true, message: "product deleted successfully", result: deletedProductwithSameSize});
       }
-      return res.status(200).json({success: false, message: "product quantity not updated", result: deletedProductwithSameSize});
+      return res.status(400).json({success: false, message: "product quantity not updated", result: deletedProductwithSameSize});
     }
 
     const updatedProductSize = await Cart.findOneAndUpdate(
@@ -121,9 +121,9 @@ export const updateProductSize = async (req, res) => {
     if (!updatedProductSize) {
       return res.status(200).json({ success: false, message: "product size not updated" });
     }
-    return res.status(201).json({success: true, message: "product details updated with size", result: updatedProductSize});
+    return res.status(201).json({success: true, message: "product size updated", result: updatedProductSize});
   } catch (err) {
-    return res.status(500).json({ success: false, message: "something went wrong", result: err });
+    return res.status(200).json({ success: false, message: "something went wrong", result: err });
   }
 };
 
@@ -155,13 +155,11 @@ export const updateProductQuantity = async (req, res) => {
       { new: true }
     );
     if (!updatedProductQuantity) {
-      return res.status(200).json({ success: false, message: "product details not updated" });
+      return res.status(200).json({ success: false, message: "product quantity not updated" });
     }
-    return res.status(201).json({success: true, message: "product details updated with size", result: updatedProductQuantity});
+    return res.status(201).json({success: true, message: "product quantity updated", result: updatedProductQuantity});
   } catch (err) {
-    return res
-      .status(500)
-      .json({ success: false, message: "something went wrong", result: err });
+    return res.status(200).json({ success: false, message: "something went wrong", result: err });
   }
 };
 
@@ -199,9 +197,9 @@ export const deleteProductFromCart = async (req, res) => {
     );
     console.log(updatedQuantityAndPrice, "deleted from cart & cart updated");
     if (!updatedQuantityAndPrice) {
-      return res.status(200).json({ success: false, message: "total quantity and price not updated"});
+      return res.status(400).json({ success: false, message: "total quantity and price not updated"});
     }
-    return res.status(200).json({success: true, message: "product deleted from cart and quantity price updated", result: updatedQuantityAndPrice});
+    return res.status(200).json({success: true, message: "product deleted from cart successfully", result: updatedQuantityAndPrice});
   } catch (err) {
     return res.status(500).json({ success: false, message: "something went wrong", result: err });
   }
@@ -238,7 +236,7 @@ export const moveProductToWishList = async (req, res) => {
     );
     console.log(updatedQuantityAndPrice, "deleted from cart & cart updated");
     if (!updatedQuantityAndPrice) {
-      return res.status(200).json({success: false, message: "total quantity and price not updated"});
+      return res.status(400).json({success: false, message: "total quantity and price not updated"});
     }
     const movedProduct = await WishList.findOneAndUpdate(
       { user: req.userData },
@@ -254,7 +252,7 @@ export const moveProductToWishList = async (req, res) => {
     }
     return res.status(200).json({success: true, message: "product moved to wishlist", result: movedProduct});
   } catch (err) {
-    return res.status(500).json({ success: false, message: "something went wrong", result: err });
+    return res.status(200).json({ success: false, message: "something went wrong", result: err });
   }
 };
 
@@ -264,8 +262,8 @@ export const deleteCart = async (req, res) => {
     if (!deletedCart) {
       return res.status(200).json({ success: false, message: "cart not deleted" });
     }
-    return res.status(200).json({ success: true, message: "cart deleted", result: deletedCart });
+    return res.status(200).json({ success: true, message: "cart deleted successfully", result: deletedCart });
   } catch (err) {
-    return res.status(500).json({ success: false, message: "something went wrong", result: err });
+    return res.status(200).json({ success: false, message: "something went wrong", result: err });
   }
 };

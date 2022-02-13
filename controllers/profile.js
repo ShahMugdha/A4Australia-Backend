@@ -8,21 +8,11 @@ export const getUserProfile = async (req, res) => {
     const address = await Address.findOne({ user: { _id: req.userData._id } });
     console.log(address, "add");
     if (!user || !address) {
-      return res
-        .status(200)
-        .json({ success: false, message: "profile not found" });
+      return res.status(200).json({ success: false, message: "profile not found" });
     }
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: "retrieved profile",
-        result: { user, addresses: address.addresses },
-      });
+    return res.status(200).json({success: true, message: "retrieved profile", result: { user, addresses: address.addresses }});
   } catch (err) {
-    return res
-      .status(500)
-      .json({ success: false, message: "something went wrong", result: err });
+    return res.status(200).json({ success: false, message: "something went wrong", result: err });
   }
 };
 
@@ -35,20 +25,10 @@ export const updateUserAccountDetails = async (req, res) => {
       { new: true }
     );
     if (!updatedAccount) {
-      return res
-        .status(200)
-        .json({ success: false, message: "account detils not updated" });
+      return res.status(200).json({ success: false, message: "account detils not updated" });
     }
-    return res
-      .status(201)
-      .json({
-        success: true,
-        message: "account detils updated",
-        result: updatedAccount,
-      });
+    return res.status(201).json({success: true, message: "account detils updated", result: updatedAccount});
   } catch (err) {
-    return res
-      .status(500)
-      .json({ success: false, message: "something went wrong", result: err });
+    return res.status(200).json({ success: false, message: "something went wrong", result: err });
   }
 };

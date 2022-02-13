@@ -1,4 +1,3 @@
-import Product from "../models/product.js";
 import Inventory from "../models/inventory.js";
 
 export const getInventoryList = async (req, res) => {

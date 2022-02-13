@@ -34,7 +34,7 @@ export const signUp = async(req, res) => {
     return res.status(201).json({success: true, message: "user created", result: user});  
   }
   catch(err) {
-    return res.status(500).json({success: false, message: "something went wrong", result: err});
+    return res.status(200).json({success: false, message: "something went wrong", result: err});
   }
 }
 
@@ -51,7 +51,7 @@ export const verifyEmail = async(req, res) => {
     return res.status(200).json({success: true, message: "user verified", result: verifyUser});
   }
   catch(err) {
-    return res.status(500).json({success: false, message: "something went wrong", result: err});
+    return res.status(200).json({success: false, message: "something went wrong", result: err});
   }
 }
 
@@ -67,7 +67,7 @@ export const login = async(req, res) => {
     }
     const checkPassword = await bcrypt.compare(password, getUserAccount.password);
     if (getUserAccount && !checkPassword) {
-      return res.status(200).json({success: false, message: 'Wrong Password '});
+      return res.status(200).json({success: false, message: 'Wrong Password!'});
     }
     if (getUserAccount.isVerified === false) {
       return res.status(200).json({success: false, message: 'Please verify your account first'});
@@ -77,7 +77,7 @@ export const login = async(req, res) => {
     return res.status(200).json({success: true, message: 'Login SuccessFull', result: sendData});
   }
   catch(err) {
-    return res.status(500).json({success: false, message: "something went wrong", result: err});
+    return res.status(200).json({success: false, message: "something went wrong", result: err});
   }
 }
 
@@ -99,7 +99,7 @@ export const ForgotPassword = async (req, res) => {
     });
   }
   catch(err) {
-    return res.status(500).json({success: false, message: "something went wrong", result: err});
+    return res.status(200).json({success: false, message: "something went wrong", result: err});
   }
 };
 // verify Otp for forgot password
@@ -125,7 +125,7 @@ export const verifyOtp = async (req, res, next) => {
     });
   }
   catch(err) {
-    return res.status(500).json({success: false, message: "something went wrong", result: err});
+    return res.status(200).json({success: false, message: "something went wrong", result: err});
   }
 };
 // change password in forgot password
@@ -137,11 +137,11 @@ export const changePassword = async (req, res) => {
     const updateUserData = await User.findOneAndUpdate({email: email}, {$set: {password: pass, otp: 0}}, {new: true});
     console.log(updateUserData, "change pass")
     if (!updateUserData) {
-      return res.status(200).json({success: false, message: 'Error While Change Your Password'});
+      return res.status(200).json({success: false, message: 'Error while changing your password, try again'});
     }
     return res.status(200).json({success: true, message: 'Password Changed Successfully', result: true});
   }
   catch(err) {
-    return res.status(500).json({success: false, message: "something went wrong", result: err});
+    return res.status(200).json({success: false, message: "something went wrong", result: err});
   }
 };

@@ -46,9 +46,9 @@ export const addProductToWishList = async(req, res) => {
         products
       });
       if(!wishlist) {
-        return res.status(200).json({success: false, message: "new wishlist not created"});
+        return res.status(200).json({success: false, message: "wishlist not created"});
       }
-      return res.status(201).json({success: true, message: "new wishlist created with one product", result: wishlist});
+      return res.status(201).json({success: true, message: "wishlist created with one product", result: wishlist});
     }
     const productExists = await WishList.findOne({user: {_id: userData._id}, products: productId})
     console.log(productExists, "product exists")
@@ -126,7 +126,7 @@ export const moveProductToCart = async(req, res) => {
       ).populate('products')
       console.log(selectedProduct, "deleted from wishlist after cart create")
       if(!selectedProduct) {
-        return res.status(200).json({success: false, message: "product not deleted from wishlist after creating your cart"});
+        return res.status(400).json({success: false, message: "product not deleted from wishlist after creating your cart"});
       }
       const quantityCheck = await WishList.findOne({user: req.userData, products: {$size: 0}})
       if(quantityCheck && quantityCheck.products.length === 0) {
@@ -171,7 +171,7 @@ export const moveProductToCart = async(req, res) => {
     ).populate('products')
     console.log(selectedProduct, "deleted from wishlist")
     if(!selectedProduct) {
-      return res.status(200).json({success: false, message: "product not deleted from wishlist"});
+      return res.status(400).json({success: false, message: "product not deleted from wishlist"});
     }
     const quantityCheck = await WishList.findOne({user: req.userData, products: {$size: 0}})
     if(quantityCheck && quantityCheck.products.length === 0) {
