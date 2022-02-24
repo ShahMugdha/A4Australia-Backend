@@ -83,6 +83,11 @@ export const deleteProductFromWishList = async(req, res) => {
     if(!deletedProduct) {
       return res.status(200).json({success: false, message: "product not deleted from wishlist"});
     }
+    const quantityCheck = await WishList.findOne({user: req.userData, products: {$size: 0}})
+    if(quantityCheck && quantityCheck.products.length === 0) {
+      const deleteWishListByUser = await WishList.findOneAndDelete({user: req.userData})
+      if(deleteWishListByUser) console.log("wishlist dropped")
+    }
     return res.status(200).json({success: true, message: "product deleted from wishlist", result: deletedProduct});
   }
   catch(err) {
@@ -133,7 +138,7 @@ export const moveProductToCart = async(req, res) => {
         const deleteWishListByUser = await WishList.findOneAndDelete({user: req.userData})
         if(deleteWishListByUser) console.log("wishlist dropped")
       }
-      return res.status(200).json({success: true, message: "product deleted from wishlist and moved to your cart", result: updatedCart});
+      return res.status(200).json({success: true, message: "product moved to your cart successfully", result: updatedCart});
     }
     
     const existingProductWithSize = await Cart.findOne({user: req.userData, cart: {$elemMatch: {product: {_id: productId}, size}}})
@@ -178,7 +183,7 @@ export const moveProductToCart = async(req, res) => {
       const deleteWishListByUser = await WishList.findOneAndDelete({user: req.userData})
       if(deleteWishListByUser) console.log("wishlist dropped")
     }
-    return res.status(200).json({success: true, message: "product deleted from wishlist and moved to cart", result: updatedCart});
+    return res.status(200).json({success: true, message: "product moved to cart successfully", result: updatedCart});
     
   }
   catch(err) {

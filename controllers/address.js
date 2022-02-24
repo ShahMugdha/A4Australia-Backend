@@ -89,7 +89,7 @@ export const getAllAddresses = async(req, res) => {
 export const getMyAddress = async(req, res) => {
   try {
     const userId = req.userData._id
-    const address = await Address.findOne({user: {_id: userId}})
+    const address = await Address.findOne({user: {_id: userId}}).populate('addresses')
     if(!address) {
       return res.status(200).json({success: false, message: "address not found"});
     }
